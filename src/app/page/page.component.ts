@@ -18,13 +18,14 @@ export class PageComponent implements OnInit {
 
     constructor(private pageService: PageService,
                 private route: ActivatedRoute) {
-        // this.loadPage();
     }
 
     private loadPage(pageName = "Home") {
         this.pageService.getPage(pageName).subscribe((result: ValueWithLogger) => {
             const page: PouchWikiPage = result.value;
             this.html$.next(page.toHtml());
+        }, error => {
+            this.html$.next("page not found");
         });
     }
 
