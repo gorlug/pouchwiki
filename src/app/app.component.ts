@@ -1,5 +1,8 @@
 import {Component} from "@angular/core";
-import * as marked from "marked";
+import {BehaviorSubject} from "rxjs";
+import {PageService} from "./page.service";
+import {ValueWithLogger} from "@gorlug/pouchdb-rxjs";
+import {PouchWikiPage} from "./PouchWikiPage";
 
 @Component({
     selector: "app-root",
@@ -9,17 +12,12 @@ import * as marked from "marked";
 export class AppComponent {
     title = "pouchwiki";
 
-    html: string;
+    html$: BehaviorSubject<string> = new BehaviorSubject("Loading...");
 
-    constructor() {
-        this.html = marked(`# Welcome to PouchWiki!
-
-Rendered with marked.
-
-* item1
-* item2
-
-[link](http://google.com)
-`);
+    constructor(private pageService: PageService) {
+        pageService.getPage("Home").subscribe((result: ValueWithLogger) => {
+            const page: PouchWikiPage = result.value;
+            this.html$.next(page.toHtml());
+        });
     }
 }
