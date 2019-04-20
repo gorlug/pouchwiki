@@ -1,5 +1,5 @@
 import {PouchDBDocument, PouchDBDocumentGenerator, PouchDBDocumentJSON} from "@gorlug/pouchdb-rxjs";
-import * as marked from "marked";
+import {PouchWikiPageToHtmlRenderer} from "./renderer";
 
 export interface PouchWikiDocument extends PouchDBDocumentJSON {
     text: string;
@@ -8,6 +8,7 @@ export interface PouchWikiDocument extends PouchDBDocumentJSON {
 export class PouchWikiPage extends PouchDBDocument<PouchWikiDocument> {
 
     text: string;
+    renderer = new PouchWikiPageToHtmlRenderer();
 
     constructor(name: string) {
         super();
@@ -23,7 +24,7 @@ export class PouchWikiPage extends PouchDBDocument<PouchWikiDocument> {
     }
 
     toHtml() {
-        return marked(this.text);
+        return this.renderer.render(this.text);
     }
 
     protected addValuesToJSONDocument(json: PouchWikiDocument): any {
