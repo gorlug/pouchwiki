@@ -1,0 +1,8 @@
+<h1>Index of all pages</h1>
+<ng-container *ngIf="list.listContent$ | async as result">
+    <ul>
+        <li *ngFor="let page of result.value">
+            <a routerLink="/page/{{page.getName()}}">{{page.getName()}}</a>
+        </li>
+    </ul>
+</ng-container>

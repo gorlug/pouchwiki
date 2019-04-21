@@ -1,4 +1,4 @@
-import {PouchDBDocument, PouchDBDocumentGenerator, PouchDBDocumentJSON} from "@gorlug/pouchdb-rxjs";
+import {PouchDBDocument, PouchDBDocumentGenerator, PouchDBDocumentJSON, PouchDBDocumentList} from "@gorlug/pouchdb-rxjs";
 import {PouchWikiPageToHtmlRenderer} from "./renderer";
 
 export interface PouchWikiDocument extends PouchDBDocumentJSON {
@@ -50,4 +50,14 @@ export class PouchWikiPageGenerator extends PouchDBDocumentGenerator<PouchWikiPa
         return page;
     }
 
+}
+
+export class PouchWikiPageList extends PouchDBDocumentList<PouchWikiPage> {
+
+    protected sort(): void {
+        super.sort();
+        this.items.sort((a: PouchWikiPage, b: PouchWikiPage) => {
+            return a.getName().localeCompare(b.getName());
+        });
+    }
 }

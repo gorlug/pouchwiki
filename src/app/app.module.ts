@@ -6,10 +6,12 @@ import {PageComponent} from "./page/page.component";
 import {RouterModule, Routes} from "@angular/router";
 import {ContentComponent} from "./content/content.component";
 import {EditorComponent} from "./editor/editor.component";
+import {IndexComponent} from "./index/index.component";
 
 const appRoutes: Routes = [
     {path: "page/:id", component: ContentComponent},
     {path: "edit/:id", component: EditorComponent},
+    {path: "index", component: IndexComponent},
     {path: "", redirectTo: "/page/Home", pathMatch: "full"}
 ];
 
@@ -18,7 +20,8 @@ const appRoutes: Routes = [
         AppComponent,
         PageComponent,
         ContentComponent,
-        EditorComponent
+        EditorComponent,
+        IndexComponent
     ],
     imports: [
         RouterModule.forRoot(appRoutes, {useHash: true}),
