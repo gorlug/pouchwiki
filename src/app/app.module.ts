@@ -5,9 +5,11 @@ import {AppComponent} from "./app.component";
 import {PageComponent} from "./page/page.component";
 import {RouterModule, Routes} from "@angular/router";
 import {ContentComponent} from "./content/content.component";
+import {EditorComponent} from "./editor/editor.component";
 
 const appRoutes: Routes = [
     {path: "page/:id", component: ContentComponent},
+    {path: "edit/:id", component: EditorComponent},
     {path: "", redirectTo: "/page/Home", pathMatch: "full"}
 ];
 
@@ -15,7 +17,8 @@ const appRoutes: Routes = [
     declarations: [
         AppComponent,
         PageComponent,
-        ContentComponent
+        ContentComponent,
+        EditorComponent
     ],
     imports: [
         RouterModule.forRoot(appRoutes, {useHash: true}),

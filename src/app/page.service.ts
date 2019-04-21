@@ -1,6 +1,11 @@
 import {Injectable} from "@angular/core";
-import {CouchDBConf, DBValueWithLog, Logger, PouchDBWrapper} from "@gorlug/pouchdb-rxjs";
+import {CouchDBConf, DBValueWithLog, Logger, PouchDBWrapper, ValueWithLogger} from "@gorlug/pouchdb-rxjs";
 import {PouchWikiPage, PouchWikiPageGenerator} from "./PouchWikiPage";
+import {ActivatedRoute, ParamMap} from "@angular/router";
+import {switchMap} from "rxjs/internal/operators/switchMap";
+import {of} from "rxjs/internal/observable/of";
+import {concatMap} from "rxjs/internal/operators/concatMap";
+import {Observable} from "rxjs";
 
 const LOG_NAME = "PouchWikiPage";
 
@@ -37,9 +42,21 @@ export class PageService {
         return Logger.getLoggerTrace();
     }
 
-    getPage(name: string) {
-        const log = this.getLogger();
+    getPage(name: string, log: Logger) {
         log.logMessage(LOG_NAME, "getPage " + name, {name});
         return this.db.getDocument(name, log);
+    }
+
+    getPageFromRoute(route: ActivatedRoute, log: Logger): Observable<ValueWithLogger> {
+        log.logMessage(LOG_NAME, "getPageTextFromRoute");
+        return route.paramMap.pipe(
+            switchMap((params: ParamMap) => {
+                const pageName = params.get("id");
+                return of(pageName);
+            }),
+            concatMap((pageName: string) => {
+               return this.getPage(pageName, log);
+            })
+        );
     }
 }

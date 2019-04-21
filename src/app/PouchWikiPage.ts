@@ -20,7 +20,11 @@ export class PouchWikiPage extends PouchDBDocument<PouchWikiDocument> {
     }
 
     getText() {
-        return this.getText();
+        return this.text;
+    }
+
+    setText(text: string) {
+        this.text = text;
     }
 
     toHtml() {

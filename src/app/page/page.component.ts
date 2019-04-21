@@ -1,11 +1,11 @@
 import {Component, OnInit} from "@angular/core";
 import {BehaviorSubject} from "rxjs";
 import {PageService} from "../page.service";
-import {ValueWithLogger} from "@gorlug/pouchdb-rxjs";
+import {Logger, ValueWithLogger} from "@gorlug/pouchdb-rxjs";
 import {PouchWikiPage} from "../PouchWikiPage";
-import {ActivatedRoute, ParamMap} from "@angular/router";
-import {switchMap} from "rxjs/operators";
-import {of} from "rxjs/internal/observable/of";
+import {ActivatedRoute} from "@angular/router";
+
+const LOG_NAME = "PageComponent";
 
 @Component({
     selector: "app-page",
@@ -15,31 +15,25 @@ import {of} from "rxjs/internal/observable/of";
 export class PageComponent implements OnInit {
 
     html$: BehaviorSubject<string> = new BehaviorSubject("Loading...");
+    pageName$: BehaviorSubject<string> = new BehaviorSubject("");
 
     constructor(private pageService: PageService,
                 private route: ActivatedRoute) {
     }
 
-    private loadPage(pageName = "Home") {
-        this.pageService.getPage(pageName).subscribe((result: ValueWithLogger) => {
-            const page: PouchWikiPage = result.value;
-            this.html$.next(page.toHtml());
-        }, error => {
-            this.html$.next("page not found");
-        });
+    private getLogger() {
+        return Logger.getLoggerTrace();
     }
 
     ngOnInit() {
-        this.route.paramMap.pipe(
-            switchMap((params: ParamMap) => {
-                const pageName = params.get("id");
-                return of(pageName);
-            })
-        ).subscribe((pageName: string) => {
-            console.log("pageName", pageName);
-            if (pageName !== null) {
-                this.loadPage(pageName);
-            }
+        const log = Logger.getLoggerTrace();
+        log.logMessage(LOG_NAME, "ngOnInit");
+        this.pageService.getPageFromRoute(this.route, log).subscribe((result: ValueWithLogger) => {
+            const page: PouchWikiPage = result.value;
+            this.pageName$.next(page.getName());
+            this.html$.next(page.toHtml());
+        }, error => {
+            this.html$.next("page not found");
         });
     }
 
