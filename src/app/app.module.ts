@@ -7,6 +7,9 @@ import {RouterModule, Routes} from "@angular/router";
 import {ContentComponent} from "./content/content.component";
 import {EditorComponent} from "./editor/editor.component";
 import {IndexComponent} from "./index/index.component";
+import {LoginComponent} from "./login/login.component";
+import {MatFormFieldModule, MatInputModule} from "@angular/material";
+import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 
 const appRoutes: Routes = [
     {path: "page/:id", component: ContentComponent},
@@ -21,11 +24,13 @@ const appRoutes: Routes = [
         PageComponent,
         ContentComponent,
         EditorComponent,
-        IndexComponent
+        IndexComponent,
+        LoginComponent
     ],
     imports: [
         RouterModule.forRoot(appRoutes, {useHash: true}),
-        BrowserModule
+        BrowserModule,
+        MatFormFieldModule, MatInputModule, BrowserAnimationsModule
     ],
     providers: [],
     bootstrap: [AppComponent]

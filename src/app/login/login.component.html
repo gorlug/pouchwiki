@@ -1,0 +1,21 @@
+<h2>Login</h2>
+<mat-form-field>
+    <input matInput placeholder="Username" id="username" #username/>
+</mat-form-field>
+<br>
+<mat-form-field>
+    <input matInput type="password" placeholder="Password" id="password" #password/>
+</mat-form-field>
+<br>
+<mat-form-field>
+    <input matInput type="url" placeholder="Url" id="url" #url/>
+</mat-form-field>
+<br>
+<button mat-raised-button (click)="login(username.value, password.value, url.value);
+    username.value=''; password.value=''; url.value=''" id="login">
+    Login
+</button>
+<p>
+<div *ngIf="(showError$ | async).showError">
+    <div class="error">{{showError$.getValue().message}}</div>
+</div>
