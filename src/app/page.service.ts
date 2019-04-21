@@ -7,6 +7,7 @@ import {of} from "rxjs/internal/observable/of";
 import {concatMap} from "rxjs/internal/operators/concatMap";
 import {Observable, throwError} from "rxjs";
 import {catchError} from "rxjs/operators";
+import {PouchWikiPageToHtmlRenderer} from "./renderer";
 
 const LOG_NAME = "PouchWikiPage";
 
@@ -54,8 +55,7 @@ export class PageService {
         return route.paramMap.pipe(
             switchMap((params: ParamMap) => {
                 currentPage = params.get("id");
-                // currentPage = PouchWikiPageToHtmlRenderer.sanitizeName(currentPage);
-                // console.log("currentPage", currentPage);
+                currentPage = PouchWikiPageToHtmlRenderer.sanitizeName(currentPage);
                 return of(currentPage);
             }),
             concatMap((pageName: string) => {
