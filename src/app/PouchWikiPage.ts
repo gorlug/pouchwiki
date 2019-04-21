@@ -12,7 +12,7 @@ export class PouchWikiPage extends PouchDBDocument<PouchWikiDocument> {
 
     constructor(name: string) {
         super();
-        name = this.renderer.sanitizeName(name);
+        name = PouchWikiPageToHtmlRenderer.sanitizeName(name);
         this.setId(name);
     }
 

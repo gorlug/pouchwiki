@@ -5,6 +5,10 @@ export class PouchWikiPageToHtmlRenderer {
 
     renderer: any;
 
+    static sanitizeName(name: string) {
+        return camelCase(name, {pascalCase: true});
+    }
+
     constructor() {
         this.initRenderer();
     }
@@ -24,13 +28,9 @@ export class PouchWikiPageToHtmlRenderer {
         return marked(text, {renderer: this.renderer});
     }
 
-    sanitizeName(name: string) {
-        return camelCase(name, {pascalCase: true});
-    }
-
     convertPageLinks(text: string) {
         return text.replace(/\[([^\]]+)\](?!\()/g, (match, pageName) => {
-            pageName = this.sanitizeName(pageName);
+            pageName = PouchWikiPageToHtmlRenderer.sanitizeName(pageName);
             match += `(/#/page/${pageName})`;
             return match;
         });

@@ -1,4 +1,4 @@
-import {Component, OnInit} from "@angular/core";
+import {AfterViewInit, Component, OnInit} from "@angular/core";
 import {BehaviorSubject} from "rxjs";
 import {PageService} from "../page.service";
 import {Logger, ValueWithLogger} from "@gorlug/pouchdb-rxjs";
@@ -13,7 +13,7 @@ const LOG_NAME = "PageComponent";
     templateUrl: "./page.component.html",
     styleUrls: ["./page.component.sass"]
 })
-export class PageComponent implements OnInit {
+export class PageComponent implements OnInit, AfterViewInit {
 
     html$: BehaviorSubject<string> = new BehaviorSubject("Loading...");
     pageName$: BehaviorSubject<string> = new BehaviorSubject("");
@@ -30,19 +30,6 @@ export class PageComponent implements OnInit {
     }
 
     ngOnInit() {
-        const log = Logger.getLoggerTrace();
-        log.logMessage(LOG_NAME, "ngOnInit");
-        this.pageService.getPageFromRoute(this.route, log).subscribe((result: ValueWithLogger) => {
-            const page: PouchWikiPage = result.value;
-            this.currentPage = page;
-            this.pageName$.next(page.getName());
-            this.html$.next(page.toHtml());
-            this.pageExists = true;
-        }, pageName => {
-            this.pageExists = false;
-            this.pageName$.next(pageName);
-            this.html$.next("page not found");
-        });
         this.listenForBackButton();
     }
 
@@ -74,5 +61,21 @@ export class PageComponent implements OnInit {
         } else {
             log.logMessage(LOG_NAME, "delete canceled", {pageName});
         }
+    }
+
+    ngAfterViewInit(): void {
+        const log = Logger.getLoggerTrace();
+        log.logMessage(LOG_NAME, "ngAfterViewInit");
+        this.pageService.getPageFromRoute(this.route, log).subscribe((result: ValueWithLogger) => {
+            const page: PouchWikiPage = result.value;
+            this.currentPage = page;
+            this.pageName$.next(page.getName());
+            this.html$.next(page.toHtml());
+            this.pageExists = true;
+        }, pageName => {
+            this.pageExists = false;
+            this.pageName$.next(pageName);
+            this.html$.next("page not found");
+        });
     }
 }

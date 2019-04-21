@@ -54,6 +54,8 @@ export class PageService {
         return route.paramMap.pipe(
             switchMap((params: ParamMap) => {
                 currentPage = params.get("id");
+                // currentPage = PouchWikiPageToHtmlRenderer.sanitizeName(currentPage);
+                // console.log("currentPage", currentPage);
                 return of(currentPage);
             }),
             concatMap((pageName: string) => {
