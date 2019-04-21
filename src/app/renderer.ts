@@ -25,9 +25,7 @@ export class PouchWikiPageToHtmlRenderer {
 
     convertPageLinks(text: string) {
         return text.replace(/\[([^\]]+)\](?!\()/g, (match, pageName) => {
-            console.log("match", match, pageName);
             match += `(/#/page/${pageName})`;
-            console.log("match after", match);
             return match;
         });
     }

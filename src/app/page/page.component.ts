@@ -32,7 +32,8 @@ export class PageComponent implements OnInit {
             const page: PouchWikiPage = result.value;
             this.pageName$.next(page.getName());
             this.html$.next(page.toHtml());
-        }, error => {
+        }, pageName => {
+            this.pageName$.next(pageName);
             this.html$.next("page not found");
         });
     }

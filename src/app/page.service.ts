@@ -5,7 +5,8 @@ import {ActivatedRoute, ParamMap} from "@angular/router";
 import {switchMap} from "rxjs/internal/operators/switchMap";
 import {of} from "rxjs/internal/observable/of";
 import {concatMap} from "rxjs/internal/operators/concatMap";
-import {Observable} from "rxjs";
+import {Observable, throwError} from "rxjs";
+import {catchError} from "rxjs/operators";
 
 const LOG_NAME = "PouchWikiPage";
 
@@ -49,13 +50,17 @@ export class PageService {
 
     getPageFromRoute(route: ActivatedRoute, log: Logger): Observable<ValueWithLogger> {
         log.logMessage(LOG_NAME, "getPageTextFromRoute");
+        let currentPage;
         return route.paramMap.pipe(
             switchMap((params: ParamMap) => {
-                const pageName = params.get("id");
-                return of(pageName);
+                currentPage = params.get("id");
+                return of(currentPage);
             }),
             concatMap((pageName: string) => {
                return this.getPage(pageName, log);
+            }),
+            catchError(() => {
+                return throwError(currentPage);
             })
         );
     }

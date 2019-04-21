@@ -43,6 +43,9 @@ export class EditorComponent implements OnInit {
             const page: PouchWikiPage = result.value;
             this.page = page;
             this.initEditor(page.getText());
+        }, pageName => {
+            this.page = new PouchWikiPage(pageName);
+            this.initEditor("");
         });
     }
 
