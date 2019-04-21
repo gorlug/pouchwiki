@@ -1,2 +1,3 @@
 <a routerLink="/edit/{{pageName$ | async}}">Edit</a>
+<input type="button" (click)="delete()" value="Delete">
 <div [innerHTML]="html$ | async" class="content"></div>

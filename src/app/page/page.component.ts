@@ -18,6 +18,7 @@ export class PageComponent implements OnInit {
     html$: BehaviorSubject<string> = new BehaviorSubject("Loading...");
     pageName$: BehaviorSubject<string> = new BehaviorSubject("");
     pageExists = false;
+    currentPage: PouchWikiPage;
 
     constructor(private pageService: PageService,
                 private route: ActivatedRoute,
@@ -33,6 +34,7 @@ export class PageComponent implements OnInit {
         log.logMessage(LOG_NAME, "ngOnInit");
         this.pageService.getPageFromRoute(this.route, log).subscribe((result: ValueWithLogger) => {
             const page: PouchWikiPage = result.value;
+            this.currentPage = page;
             this.pageName$.next(page.getName());
             this.html$.next(page.toHtml());
             this.pageExists = true;
@@ -52,8 +54,25 @@ export class PageComponent implements OnInit {
         ).subscribe((event: NavigationStart) => {
             console.log(event, this.pageExists);
             if (event.restoredState !== null && !this.pageExists) {
-                window.location.reload();
+                this.refresh();
             }
         });
+    }
+
+    private refresh() {
+        window.location.reload();
+    }
+
+    delete() {
+        const log = this.getLogger();
+        const pageName = this.pageName$.getValue();
+        log.logMessage(LOG_NAME, "delete", {pageName});
+        if (confirm(`Delete page ${pageName}?`)) {
+            this.pageService.db.deleteDocument(this.currentPage, log).subscribe(() => {
+                this.refresh();
+            });
+        } else {
+            log.logMessage(LOG_NAME, "delete canceled", {pageName});
+        }
     }
 }

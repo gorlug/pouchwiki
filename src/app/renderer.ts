@@ -1,5 +1,5 @@
 import * as marked from "marked";
-import {PouchWikiPage} from "./PouchWikiPage";
+import * as camelCase from "camelcase";
 
 export class PouchWikiPageToHtmlRenderer {
 
@@ -24,9 +24,13 @@ export class PouchWikiPageToHtmlRenderer {
         return marked(text, {renderer: this.renderer});
     }
 
+    sanitizeName(name: string) {
+        return camelCase(name, {pascalCase: true});
+    }
+
     convertPageLinks(text: string) {
         return text.replace(/\[([^\]]+)\](?!\()/g, (match, pageName) => {
-            pageName = PouchWikiPage.sanitizeName(pageName);
+            pageName = this.sanitizeName(pageName);
             match += `(/#/page/${pageName})`;
             return match;
         });
