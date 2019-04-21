@@ -23,6 +23,7 @@
     "@gorlug/pouchdb-rxjs": "^0.2.0",
     "@types/pouchdb-core": "^7.0.2",
     "ace-builds": "^1.4.3",
+    "camelcase": "^5.3.1",
     "core-js": "^2.5.4",
     "marked": "^0.6.2",
     "rxjs": "~6.3.3",

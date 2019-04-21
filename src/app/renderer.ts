@@ -1,4 +1,5 @@
 import * as marked from "marked";
+import {PouchWikiPage} from "./PouchWikiPage";
 
 export class PouchWikiPageToHtmlRenderer {
 
@@ -25,6 +26,7 @@ export class PouchWikiPageToHtmlRenderer {
 
     convertPageLinks(text: string) {
         return text.replace(/\[([^\]]+)\](?!\()/g, (match, pageName) => {
+            pageName = PouchWikiPage.sanitizeName(pageName);
             match += `(/#/page/${pageName})`;
             return match;
         });

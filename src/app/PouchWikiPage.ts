@@ -1,5 +1,6 @@
 import {PouchDBDocument, PouchDBDocumentGenerator, PouchDBDocumentJSON} from "@gorlug/pouchdb-rxjs";
 import {PouchWikiPageToHtmlRenderer} from "./renderer";
+import * as camelCase from "camelcase";
 
 export interface PouchWikiDocument extends PouchDBDocumentJSON {
     text: string;
@@ -9,6 +10,10 @@ export class PouchWikiPage extends PouchDBDocument<PouchWikiDocument> {
 
     text: string;
     renderer = new PouchWikiPageToHtmlRenderer();
+
+    static sanitizeName(name: string) {
+        return camelCase(name, {pascalCase: true});
+    }
 
     constructor(name: string) {
         super();
