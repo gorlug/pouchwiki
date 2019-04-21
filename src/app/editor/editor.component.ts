@@ -5,10 +5,11 @@ import "ace-builds/src-noconflict/mode-markdown";
 import "ace-builds/src-noconflict/theme-github";
 import {PageService} from "../page.service";
 import {BehaviorSubject} from "rxjs";
-import {Logger, ValueWithLogger} from "@gorlug/pouchdb-rxjs";
+import {ValueWithLogger} from "@gorlug/pouchdb-rxjs";
 import {ActivatedRoute, Router} from "@angular/router";
 import {PouchWikiPage} from "../PouchWikiPage";
 import {fromPromise} from "rxjs/internal-compatibility";
+import {LoggingService} from "../logging.service";
 
 const THEME = "ace/theme/github";
 const LANG = "ace/mode/markdown";
@@ -30,11 +31,12 @@ export class EditorComponent implements OnInit {
 
     constructor(private pageService: PageService,
                 private route: ActivatedRoute,
-                private router: Router) {
+                private router: Router,
+                private loggingService: LoggingService) {
     }
 
     getLogger() {
-        return Logger.getLoggerTrace();
+        return this.loggingService.getLogger();
     }
 
     ngOnInit() {

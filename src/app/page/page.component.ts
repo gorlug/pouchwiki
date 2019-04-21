@@ -5,6 +5,7 @@ import {Logger, ValueWithLogger} from "@gorlug/pouchdb-rxjs";
 import {PouchWikiPage} from "../PouchWikiPage";
 import {ActivatedRoute, NavigationStart, Router} from "@angular/router";
 import {filter} from "rxjs/operators";
+import {LoggingService} from "../logging.service";
 
 const LOG_NAME = "PageComponent";
 
@@ -22,11 +23,12 @@ export class PageComponent implements OnInit, AfterViewInit {
 
     constructor(private pageService: PageService,
                 private route: ActivatedRoute,
-                private router: Router) {
+                private router: Router,
+                private loggingService: LoggingService) {
     }
 
     private getLogger() {
-        return Logger.getLoggerTrace();
+        return this.loggingService.getLogger();
     }
 
     ngOnInit() {

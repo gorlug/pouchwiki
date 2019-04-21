@@ -1,7 +1,7 @@
 import {Component, OnInit} from "@angular/core";
 import {PageService} from "../page.service";
 import {PouchWikiPageList} from "../PouchWikiPage";
-import {Logger} from "@gorlug/pouchdb-rxjs";
+import {LoggingService} from "../logging.service";
 
 const LOG_NAME = "IndexComponent";
 
@@ -14,7 +14,8 @@ export class IndexComponent implements OnInit {
 
     list: PouchWikiPageList;
 
-    constructor(private pageService: PageService) {
+    constructor(private pageService: PageService,
+                private loggingService: LoggingService) {
         const log = this.getLogger();
         log.logMessage(LOG_NAME, "constructor");
         this.list = new PouchWikiPageList();
@@ -22,7 +23,7 @@ export class IndexComponent implements OnInit {
     }
 
     getLogger() {
-        return Logger.getLoggerTrace();
+        return this.loggingService.getLogger();
     }
 
     ngOnInit() {
