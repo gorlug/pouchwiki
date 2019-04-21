@@ -1,5 +1,6 @@
 import {PouchDBDocument, PouchDBDocumentGenerator, PouchDBDocumentJSON, PouchDBDocumentList} from "@gorlug/pouchdb-rxjs";
 import {PouchWikiPageToHtmlRenderer} from "./renderer";
+import {AppVersion} from "./app.version";
 
 export interface PouchWikiDocument extends PouchDBDocumentJSON {
     text: string;
@@ -13,6 +14,7 @@ export class PouchWikiPage extends PouchDBDocument<PouchWikiDocument> {
     constructor(name: string) {
         super();
         name = PouchWikiPageToHtmlRenderer.sanitizeName(name);
+        this.docVersion = AppVersion.VERSION;
         this.setId(name);
     }
 
