@@ -10,6 +10,8 @@ import {IndexComponent} from "./index/index.component";
 import {LoginComponent} from "./login/login.component";
 import {MatFormFieldModule, MatInputModule} from "@angular/material";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
+import {ServiceWorkerModule} from "@angular/service-worker";
+import {environment} from "../environments/environment";
 
 const appRoutes: Routes = [
     {path: "page/:id", component: ContentComponent},
@@ -30,7 +32,8 @@ const appRoutes: Routes = [
     imports: [
         RouterModule.forRoot(appRoutes, {useHash: true}),
         BrowserModule,
-        MatFormFieldModule, MatInputModule, BrowserAnimationsModule
+        MatFormFieldModule, MatInputModule, BrowserAnimationsModule,
+        ServiceWorkerModule.register("ngsw-worker.js", {enabled: environment.production})
     ],
     providers: [],
     bootstrap: [AppComponent]
