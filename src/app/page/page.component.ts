@@ -57,7 +57,7 @@ export class PageComponent implements OnInit, AfterViewInit {
         const pageName = this.pageName$.getValue();
         log.logMessage(LOG_NAME, "delete", {pageName});
         if (confirm(`Delete page ${pageName}?`)) {
-            this.pageService.db.deleteDocument(this.currentPage, log).subscribe(() => {
+            this.pageService.getDB().deleteDocument(this.currentPage, log).subscribe(() => {
                 this.refresh();
             });
         } else {

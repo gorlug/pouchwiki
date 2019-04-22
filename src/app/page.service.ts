@@ -1,5 +1,5 @@
 import {Injectable} from "@angular/core";
-import {CouchDBConf, DBValueWithLog, Logger, PouchDBWrapper, ValueWithLogger} from "@gorlug/pouchdb-rxjs";
+import {Logger, PouchDBDocumentGenerator, ValueWithLogger} from "@gorlug/pouchdb-rxjs";
 import {PouchWikiPage, PouchWikiPageGenerator} from "./PouchWikiPage";
 import {ActivatedRoute, ParamMap} from "@angular/router";
 import {switchMap} from "rxjs/internal/operators/switchMap";
@@ -8,40 +8,24 @@ import {concatMap} from "rxjs/internal/operators/concatMap";
 import {Observable, throwError} from "rxjs";
 import {catchError} from "rxjs/operators";
 import {PouchWikiPageToHtmlRenderer} from "./renderer";
+import {AbstractPouchDBService} from "./AbstractPouchDBService";
+import {LoggingService} from "./logging.service";
+import {LoginCredentials, LoginService} from "./login.service";
 
 const LOG_NAME = "PouchWikiPage";
 
 @Injectable({
     providedIn: "root"
 })
-export class PageService {
+export class PageService extends AbstractPouchDBService {
 
-    db: PouchDBWrapper;
-
-    constructor() {
-        this.initDB();
-    }
-
-    private initDB() {
-        const log = this.getLogger();
-        const startLog = log.start(LOG_NAME, "init db");
-        const conf = new CouchDBConf();
-        conf.setBaseUrl("http://couchdb-test:5984");
-        conf.setCredentials({
-            username: "admin",
-            password: "admin"
-        });
-        conf.setDBName("pouchwiki")
-        conf.setGenerator(new PouchWikiPageGenerator());
-        PouchDBWrapper.loadExternalDB(conf, log).subscribe((result: DBValueWithLog) => {
-            this.db = result.value;
-            result.log.complete();
-            startLog.complete();
-        });
+    constructor(protected loggingService: LoggingService,
+                protected loginService: LoginService) {
+        super(loggingService, loginService);
     }
 
     private getLogger() {
-        return Logger.getLoggerTrace();
+        return this.loggingService.getLogger();
     }
 
     getPage(name: string, log: Logger) {
@@ -65,5 +49,17 @@ export class PageService {
                 return throwError(currentPage);
             })
         );
+    }
+
+    getDBName(): string {
+        return "pouchwiki";
+    }
+
+    getExternalDBName(credentials: LoginCredentials): string {
+        return credentials.db;
+    }
+
+    getGenerator(): PouchDBDocumentGenerator<any> {
+        return new PouchWikiPageGenerator();
     }
 }

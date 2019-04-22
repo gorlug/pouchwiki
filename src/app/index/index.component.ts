@@ -19,7 +19,7 @@ export class IndexComponent implements OnInit {
         const log = this.getLogger();
         log.logMessage(LOG_NAME, "constructor");
         this.list = new PouchWikiPageList();
-        this.list.subscribeTo(pageService.db, log).subscribe(() => {});
+        this.list.subscribeTo(pageService.getDB(), log).subscribe(() => {});
     }
 
     getLogger() {

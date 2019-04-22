@@ -71,7 +71,7 @@ export class EditorComponent implements OnInit {
         const text = this.codeEditor.getSession().getValue();
         console.log(text);
         this.page.setText(text);
-        this.pageService.db.saveDocument(this.page, log).subscribe(() => {
+        this.pageService.getDB().saveDocument(this.page, log).subscribe(() => {
             this.navigateToCurrentPage(startLog);
         });
     }
