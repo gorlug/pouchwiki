@@ -27,6 +27,7 @@ PouchDB.debug.enable("*");
 
 export interface CredentialsWithUrl extends Credentials {
     url: string;
+    db: string;
 }
 
 export interface LoginCredentialsDoc extends PouchDBDocumentJSON, CredentialsWithUrl {
@@ -38,6 +39,7 @@ export class LoginCredentials extends PouchDBDocument<LoginCredentialsDoc> {
     username: string;
     password: string;
     url: string;
+    db: string;
 
     constructor() {
         super();
@@ -50,6 +52,7 @@ export class LoginCredentials extends PouchDBDocument<LoginCredentialsDoc> {
         this.username = credentials.username;
         this.password = credentials.password;
         this.url = credentials.url;
+        this.db = credentials.db;
     }
 
     getCouchDBCredentails(): Credentials {
@@ -63,6 +66,7 @@ export class LoginCredentials extends PouchDBDocument<LoginCredentialsDoc> {
         json.username = this.username;
         json.password = this.password;
         json.url = this.url;
+        json.db = this.db;
     }
 
     protected getNameOfDoc(): string {
@@ -79,6 +83,9 @@ export class LoginCredentials extends PouchDBDocument<LoginCredentialsDoc> {
             },
             (other: LoginCredentials) => {
                 return this.url === other.url;
+            },
+            (other: LoginCredentials) => {
+                return this.db === other.db;
             }
         ];
     }
@@ -87,6 +94,7 @@ export class LoginCredentials extends PouchDBDocument<LoginCredentialsDoc> {
         const debugInfo: any = super.getDebugInfo();
         debugInfo.username = this.username;
         debugInfo.url = this.url;
+        debugInfo.db = this.db;
         return debugInfo;
     }
 }
@@ -98,6 +106,7 @@ export class CredentialsGenerator extends PouchDBDocumentGenerator<LoginCredenti
         credentials.username = json.username;
         credentials.password = json.password;
         credentials.url = json.url;
+        credentials.db = json.db;
         return credentials;
     }
 
@@ -454,7 +463,7 @@ export class LoginCredentialsChecker {
     private createCouchDBConf(loginCredentials: LoginCredentials) {
         const couchDBConf = new CouchDBConf();
         couchDBConf.setBaseUrl(loginCredentials.url);
-        couchDBConf.setDBName(LoginService.DB_NAME);
+        couchDBConf.setDBName(loginCredentials.db);
         couchDBConf.setCredentials(loginCredentials.getCouchDBCredentails());
         couchDBConf.setGenerator(new CredentialsGenerator());
         return couchDBConf;
@@ -503,11 +512,11 @@ export class LoginCredentialsChecker {
 }
 
 export const CredentialsFactory = {
-    createCredentialsChecker: function(): LoginCredentialsChecker {
+    createCredentialsChecker: (): LoginCredentialsChecker => {
         return new LoginCredentialsChecker();
     },
 
-    getExternalDBUrlValidator: function(): ExternalDBUrlValidator {
+    getExternalDBUrlValidator: (): ExternalDBUrlValidator => {
         return new ExternalDBUrlValidator();
     }
 };

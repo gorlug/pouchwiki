@@ -11,7 +11,11 @@
     <input matInput type="url" placeholder="Url" id="url" #url/>
 </mat-form-field>
 <br>
-<button mat-raised-button (click)="login(username.value, password.value, url.value);
+<mat-form-field>
+    <input matInput type="text" placeholder="DB" id="db" #db/>
+</mat-form-field>
+<br>
+<button mat-raised-button (click)="login(username.value, password.value, url.value, db.value);
     username.value=''; password.value=''; url.value=''" id="login">
     Login
 </button>

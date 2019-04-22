@@ -90,7 +90,8 @@ COUCHDB_CONF.setCredentials(LOCAL_COUCHDB_CREDENTIALS);
 const TEST_USER_CREDENTIALS: CredentialsWithUrl = {
     username: "testuser",
     password: "somepassword",
-    url: COUCHDB_CONF.toBaseUrl()
+    url: COUCHDB_CONF.toBaseUrl(),
+    db: LoginService.DB_NAME
 };
 
 const LOG_NAME = "LoginServiceTest";
@@ -490,7 +491,8 @@ describe("LoginService", () => {
                 const credentials: CredentialsWithUrl = {
                     username: "something",
                     password: "something",
-                    url: "http://not-reachable:5984"
+                    url: "http://not-reachable:5984",
+                    db: LoginService.DB_NAME
                 };
                 const loginCredentials = new LoginCredentials();
                 loginCredentials.setCredentials(credentials);
@@ -744,7 +746,8 @@ describe("LoginService", () => {
                 const credentials: CredentialsWithUrl = {
                     username: "someuser",
                     password: "wrong password",
-                    url: TEST_USER_CREDENTIALS.url
+                    url: TEST_USER_CREDENTIALS.url,
+                    db: LoginService.DB_NAME
                 };
                 return loginService.login(credentials, result.log);
             }),
@@ -968,7 +971,8 @@ describe("LoginService", () => {
                 const credentials: CredentialsWithUrl = {
                     username: "someuser",
                     password: "wrong password",
-                    url: "http://does-not-exist:5984/"
+                    url: "http://does-not-exist:5984/",
+                    db: LoginService.DB_NAME
                 };
                 return loginService.login(credentials, result.log);
             });

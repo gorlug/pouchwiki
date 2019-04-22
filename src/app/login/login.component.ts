@@ -58,8 +58,8 @@ export class LoginComponent extends ObservableComponent {
         this.errorToMessageMappings.push(new MessageForError(LoginCredentialsAreNullError, "Given login credentials were null"));
     }
 
-    login(username: string, password: string, url: string) {
-        const credentials: CredentialsWithUrl = this.getCredentials(username, password, url);
+    login(username: string, password: string, url: string, db: string) {
+        const credentials: CredentialsWithUrl = this.getCredentials(username, password, url, db);
         let log = this.loggingService.getLogger();
         log = log.start(LOG_NAME, "login", {username: username, url: url});
         this.loginService.login(credentials, log).subscribe((next) => {
@@ -84,11 +84,12 @@ export class LoginComponent extends ObservableComponent {
         return message;
     }
 
-    private getCredentials(username: string, password: string, url: string) {
+    private getCredentials(username: string, password: string, url: string, db: string) {
         return {
             username: username,
             password: password,
-            url: url
+            url: url,
+            db: db
         };
     }
 }

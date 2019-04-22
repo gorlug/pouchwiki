@@ -106,11 +106,13 @@ describe("LoginComponent", () => {
         const name = "user";
         const password = "password";
         const url = "http://example.com";
-        component.login(name, password, url);
+        const db = "db";
+        component.login(name, password, url, db);
         const credentials: CredentialsWithUrl = loginService.credentials;
         expect(credentials.username).toBe(name);
         expect(credentials.password).toBe(password);
         expect(credentials.url).toBe(url);
+        expect(credentials.db).toBe(db);
     });
 
     function getErrorElement() {
@@ -130,28 +132,28 @@ describe("LoginComponent", () => {
 
     it("should display a DBNotReachableError upon login", complete => {
         loginService.throwErrorUponLogin(new DBNotReachableError(loggingService.getLogger()));
-        component.login("does not", "matter", "http://not-reachable");
+        component.login("does not", "matter", "http://not-reachable", "db");
         expectShowingLoginError("URL cannot be reached");
         complete();
     });
 
     it("should display an AuthorizationError upon login", complete => {
         loginService.throwErrorUponLogin(new AuthorizationError(loggingService.getLogger()));
-        component.login("not", "authorized", "http://db");
+        component.login("not", "authorized", "http://db", "db");
         expectShowingLoginError("You are not authorized");
         complete();
     });
 
     it("should display an AuthenticationError upon login", complete => {
         loginService.throwErrorUponLogin(new AuthenticationError(loggingService.getLogger()));
-        component.login("wrong", "password", "http://db");
+        component.login("wrong", "password", "http://db", "db");
         expectShowingLoginError("Wrong username or password");
         complete();
     });
 
     it("should display an LoginCredentialsAreNull upon login", complete => {
         loginService.throwErrorUponLogin(new LoginCredentialsAreNullError(loggingService.getLogger()));
-        component.login(null, null, "http://db");
+        component.login(null, null, "http://db", "db");
         expectShowingLoginError("Given login credentials were null");
         complete();
     });
@@ -159,18 +161,18 @@ describe("LoginComponent", () => {
     it("should display the error itself if no instance of the error is found", complete => {
         const message = "some random error";
         loginService.throwErrorUponLogin(message);
-        component.login(null, null, "http://db");
+        component.login(null, null, "http://db", "db");
         expectShowingLoginError(message);
         complete();
     });
 
     it("the login error should disappear upon successful login", complete => {
         loginService.throwErrorUponLogin(new AuthenticationError(loggingService.getLogger()));
-        component.login("wrong", "password", "http://db");
+        component.login("wrong", "password", "http://db", "db");
         expectShowingLoginError("Wrong username or password");
 
         loginService.throwErrorUponLogin(undefined);
-        component.login("right", "password", "http://db");
+        component.login("right", "password", "http://db", "db");
         fixture.detectChanges();
         const errorElement = getErrorElement();
         expect(errorElement).toBeFalsy();

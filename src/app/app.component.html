@@ -1,1 +1,6 @@
-<router-outlet></router-outlet>
+<div *ngIf="(loginService.showLogin$ | async).value else loggedIn">
+    <app-login></app-login>
+</div>
+<ng-template #loggedIn>
+    <router-outlet></router-outlet>
+</ng-template>
