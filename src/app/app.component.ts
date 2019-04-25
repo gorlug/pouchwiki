@@ -10,6 +10,6 @@ export class AppComponent {
     title = "pouchwiki";
 
 
-    constructor(private loginService: LoginService) {
+    constructor(public loginService: LoginService) {
     }
 }

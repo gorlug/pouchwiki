@@ -12,12 +12,14 @@ import {MatFormFieldModule, MatInputModule} from "@angular/material";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {ServiceWorkerModule} from "@angular/service-worker";
 import {environment} from "../environments/environment";
+import {AttachmentsComponent} from "./attachments/attachments.component";
 
 const appRoutes: Routes = [
     {path: "page/:id", component: ContentComponent},
     {path: "edit/:id", component: EditorComponent},
     {path: "index", component: IndexComponent},
-    {path: "", redirectTo: "/page/Home", pathMatch: "full"}
+    {path: "attachments/:id", component: AttachmentsComponent},
+    {path: "", redirectTo: "/page/Home", pathMatch: "full"},
 ];
 
 @NgModule({
@@ -27,7 +29,8 @@ const appRoutes: Routes = [
         ContentComponent,
         EditorComponent,
         IndexComponent,
-        LoginComponent
+        LoginComponent,
+        AttachmentsComponent
     ],
     imports: [
         RouterModule.forRoot(appRoutes, {useHash: true}),

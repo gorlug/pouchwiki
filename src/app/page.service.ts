@@ -1,5 +1,5 @@
 import {Injectable} from "@angular/core";
-import {Logger, PouchDBDocumentGenerator, ValueWithLogger} from "@gorlug/pouchdb-rxjs";
+import {Logger, PouchDBDocument, PouchDBDocumentGenerator, ValueWithLogger} from "@gorlug/pouchdb-rxjs";
 import {PouchWikiPage, PouchWikiPageGenerator} from "./PouchWikiPage";
 import {ActivatedRoute, ParamMap} from "@angular/router";
 import {switchMap} from "rxjs/internal/operators/switchMap";
@@ -11,8 +11,16 @@ import {PouchWikiPageToHtmlRenderer} from "./renderer";
 import {AbstractPouchDBService} from "./AbstractPouchDBService";
 import {LoggingService} from "./logging.service";
 import {LoginCredentials, LoginService} from "./login.service";
+import {fromPromise} from "rxjs/internal-compatibility";
+import {Log} from "@angular/core/testing/src/logger";
 
 const LOG_NAME = "PouchWikiPage";
+
+// export interface AttachmentValues {
+//     name: string;
+//     type: string;
+//     data: string;
+// }
 
 @Injectable({
     providedIn: "root"
@@ -61,5 +69,29 @@ export class PageService extends AbstractPouchDBService {
 
     getGenerator(): PouchDBDocumentGenerator<any> {
         return new PouchWikiPageGenerator();
+    }
+
+    // storeAttachment(document: PouchDBDocument<any>, values: AttachmentValues, log: Logger) {
+    //     log.logMessage(LOG_NAME, "storeAttachment", {name: values.name, type: values.type});
+    //     return log.addTo(fromPromise(this.db.getPouchDB().putAttachment(document.getId(),
+    //         values.name, values.data, values.type)));
+    // }
+
+    getAttachmentData(page: PouchWikiPage, name: string, log: Logger): Observable<ValueWithLogger> {
+        log.logMessage(LOG_NAME, "getAttachmentData of page " + page.getName() + " and name " + name,
+            {page: page.getName(), name: name});
+        // return fromPromise(this.getDB().getPouchDB().get(page.getId(), {attachments: true})).pipe(
+        //     concatMap((result: any) => {
+        //         const attachmentValue = result._attachments[name].data;
+        //         const url = URL.createObjectURL(attachmentValue);
+        //         return log.addTo(of(url));
+        //     })
+        // );
+        return fromPromise(this.getDB().getPouchDB().getAttachment(page.getId(), name)).pipe(
+            concatMap(blob => {
+                const url = URL.createObjectURL(blob);
+                return log.addTo(of(url));
+            })
+        );
     }
 }
