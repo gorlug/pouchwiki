@@ -1,7 +1,6 @@
 import {PouchDBDocument, PouchDBDocumentGenerator, PouchDBDocumentJSON, PouchDBDocumentList} from "@gorlug/pouchdb-rxjs";
 import {PouchWikiPageToHtmlRenderer} from "./renderer";
 import {AppVersion} from "./app.version";
-import {__values} from "tslib";
 
 export interface PouchWikiDocument extends PouchDBDocumentJSON {
     text: string;
@@ -52,6 +51,12 @@ export class PouchWikiPage extends PouchDBDocument<PouchWikiDocument> {
         this.attachments.push(attachment);
     }
 
+    deleteAttachment(attachment: PouchWikiAttachment) {
+        this.attachments = this.attachments.filter(currentAttachment => {
+            return currentAttachment.name !== attachment.name;
+        });
+    }
+
     protected addValuesToJSONDocument(json: PouchWikiDocument): any {
         json.text = this.text;
         json._attachments = {};
@@ -72,11 +77,9 @@ export class PouchWikiPage extends PouchDBDocument<PouchWikiDocument> {
 export class PouchWikiPageGenerator extends PouchDBDocumentGenerator<PouchWikiPage> {
 
     protected createDocument(json: PouchWikiDocument): PouchWikiPage {
-        console.log("createDocument", json);
         const page = new PouchWikiPage(json._id);
         page.text = json.text;
         this.addAttachments(page, json);
-        console.log("page", page);
         return page;
     }
 

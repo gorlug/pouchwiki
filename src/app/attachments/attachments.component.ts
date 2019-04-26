@@ -1,8 +1,7 @@
 import {Component, ElementRef, OnInit, ViewChild} from "@angular/core";
 import {LoggingService} from "../logging.service";
-import {Logger, ValueWithLogger} from "@gorlug/pouchdb-rxjs";
-import {Observable, of, Subject} from "rxjs";
-import {concatMap} from "rxjs/operators";
+import {ValueWithLogger} from "@gorlug/pouchdb-rxjs";
+import {BehaviorSubject} from "rxjs";
 import {PageService} from "../page.service";
 import {PouchWikiAttachment, PouchWikiPage} from "../PouchWikiPage";
 import {ActivatedRoute} from "@angular/router";
@@ -18,8 +17,7 @@ const LOG_NAME = "AttachmentsComponent";
 export class AttachmentsComponent implements OnInit {
 
     page: PouchWikiPage;
-    url$: Subject<any> = new Subject();
-    url;
+    attachments$: BehaviorSubject<PouchWikiAttachment[]> = new BehaviorSubject([]);
 
     @ViewChild("file") fileInput: ElementRef;
 
@@ -34,13 +32,7 @@ export class AttachmentsComponent implements OnInit {
         log.logMessage(LOG_NAME, "ngOnInit load page");
         this.pageService.getPageFromRoute(this.route, log).subscribe((result: ValueWithLogger) => {
             this.page = result.value;
-            this.pageService.getAttachmentData(this.page, "anzeige_ist_raus.jpg", log)
-                .subscribe((dataResult: ValueWithLogger) => {
-                    const url = this.sanitizer.bypassSecurityTrustUrl(dataResult.value);
-                    console.log("dataResult", url);
-                    this.url$.next(url);
-                    this.url = url;
-                });
+            this.loadAttachments();
         });
     }
 
@@ -53,59 +45,49 @@ export class AttachmentsComponent implements OnInit {
             return;
         }
         const file = $event.target.files[0];
-        console.log(file);
         const attachment: PouchWikiAttachment = {
             name: file.name,
             content_type: file.type,
             data: file,
         };
-        this.page.addAttachment(attachment);
-        this.pageService.getDB().saveDocument(this.page, log).subscribe((result: ValueWithLogger) => {
-            result.log.complete();
-            console.log("result", result.value);
+        this.pageService.saveAttachment(this.page, attachment, log)
+        .subscribe((result: ValueWithLogger) => {
+            this.page = result.value;
+            this.loadAttachments();
+            startLog.complete();
         });
-        // this.readInFile($event, log);
     }
 
     private fileChangeEventDoesNotHaveFile($event: any) {
         return !$event.target.files || $event.target.files.length === 0;
     }
 
-    // private readInFile($event: any, log: Logger) {
-    //     const file = $event.target.files[0];
-    //     console.log(file);
-    //     this.getFileData(file).pipe(
-    //         concatMap(data => {
-    //             return of(this.createAttachmentValues(file, data, log));
-    //         }),
-    //         concatMap((values: AttachmentValues) => {
-    //             return this.pageService.storeAttachment(this.page, values, log);
-    //         })
-    //     ).subscribe((result: ValueWithLogger) => {
-    //         console.log("result", result);
-    //     });
-    // }
-    //
-    // private getFileData(file: any): Observable<string> {
-    //     return Observable.create(subscriber => {
-    //         const reader = new FileReader();
-    //         reader.readAsDataURL(file);
-    //         reader.onload = () => {
-    //             subscriber.next(reader.result);
-    //             subscriber.complete();
-    //         };
-    //     });
-    // }
-    //
-    // private createAttachmentValues(file: any, data: string, log: Logger): AttachmentValues {
-    //     const values: AttachmentValues = {
-    //         name: file.name,
-    //         type: file.type,
-    //         data: data
-    //     };
-    //     log.logMessage(LOG_NAME, "createAttachmentValues of attachment " + values.name, {
-    //         name: values.name, type: values.type
-    //     });
-    //     return values;
-    // }
+    private loadAttachments() {
+        const attachments = this.page.attachments.slice(0);
+        console.log("load attachments", attachments);
+        this.attachments$.next(attachments);
+    }
+
+    download(attachment: PouchWikiAttachment) {
+        const log = this.loggingService.getLogger();
+        const startLog = log.start(LOG_NAME, "download " + attachment.name + " on page " +
+              this.page.getName(), {name: name, page: this.page.getName()});
+        this.pageService.openAttachment(this.page, attachment, log).subscribe(next => {
+            startLog.complete();
+        });
+    }
+
+    delete(attachment: PouchWikiAttachment) {
+        const log = this.loggingService.getLogger();
+        const startLog = log.start(LOG_NAME, "delete " + attachment.name + " on page " +
+            this.page.getName(), {name: name, page: this.page.getName()});
+        if (confirm(`Delete attachment ${attachment.name}`)) {
+            this.pageService.deleteAttachment(this.page, attachment, log).subscribe(
+                (result: ValueWithLogger) => {
+                    this.page = result.value;
+                    this.loadAttachments();
+                    startLog.complete();
+            });
+        }
+    }
 }

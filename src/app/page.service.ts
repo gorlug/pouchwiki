@@ -1,26 +1,19 @@
 import {Injectable} from "@angular/core";
-import {Logger, PouchDBDocument, PouchDBDocumentGenerator, ValueWithLogger} from "@gorlug/pouchdb-rxjs";
-import {PouchWikiPage, PouchWikiPageGenerator} from "./PouchWikiPage";
+import {Logger, PouchDBDocumentGenerator, ValueWithLogger} from "@gorlug/pouchdb-rxjs";
+import {PouchWikiAttachment, PouchWikiPage, PouchWikiPageGenerator} from "./PouchWikiPage";
 import {ActivatedRoute, ParamMap} from "@angular/router";
 import {switchMap} from "rxjs/internal/operators/switchMap";
 import {of} from "rxjs/internal/observable/of";
 import {concatMap} from "rxjs/internal/operators/concatMap";
 import {Observable, throwError} from "rxjs";
-import {catchError} from "rxjs/operators";
+import {catchError, tap} from "rxjs/operators";
 import {PouchWikiPageToHtmlRenderer} from "./renderer";
 import {AbstractPouchDBService} from "./AbstractPouchDBService";
 import {LoggingService} from "./logging.service";
 import {LoginCredentials, LoginService} from "./login.service";
 import {fromPromise} from "rxjs/internal-compatibility";
-import {Log} from "@angular/core/testing/src/logger";
 
-const LOG_NAME = "PouchWikiPage";
-
-// export interface AttachmentValues {
-//     name: string;
-//     type: string;
-//     data: string;
-// }
+const LOG_NAME = "PageService";
 
 @Injectable({
     providedIn: "root"
@@ -71,27 +64,56 @@ export class PageService extends AbstractPouchDBService {
         return new PouchWikiPageGenerator();
     }
 
-    // storeAttachment(document: PouchDBDocument<any>, values: AttachmentValues, log: Logger) {
-    //     log.logMessage(LOG_NAME, "storeAttachment", {name: values.name, type: values.type});
-    //     return log.addTo(fromPromise(this.db.getPouchDB().putAttachment(document.getId(),
-    //         values.name, values.data, values.type)));
-    // }
-
-    getAttachmentData(page: PouchWikiPage, name: string, log: Logger): Observable<ValueWithLogger> {
-        log.logMessage(LOG_NAME, "getAttachmentData of page " + page.getName() + " and name " + name,
+    getAttachmentData(page: PouchWikiPage, attachment: PouchWikiAttachment, log: Logger): Observable<ValueWithLogger> {
+        const startLog = log.start(LOG_NAME, "getAttachmentData of page " + page.getName()
+            + " and name " + attachment.name,
             {page: page.getName(), name: name});
-        // return fromPromise(this.getDB().getPouchDB().get(page.getId(), {attachments: true})).pipe(
-        //     concatMap((result: any) => {
-        //         const attachmentValue = result._attachments[name].data;
-        //         const url = URL.createObjectURL(attachmentValue);
-        //         return log.addTo(of(url));
-        //     })
-        // );
-        return fromPromise(this.getDB().getPouchDB().getAttachment(page.getId(), name)).pipe(
+        return fromPromise(this.getDB().getPouchDB().getAttachment(page.getId(), attachment.name)).pipe(
             concatMap(blob => {
                 const url = URL.createObjectURL(blob);
+                startLog.complete();
                 return log.addTo(of(url));
             })
+        );
+    }
+
+    openAttachment(page: PouchWikiPage, attachment: PouchWikiAttachment, log: Logger) {
+        const startLog = this.logStart(log, page, attachment);
+        return this.getAttachmentData(page, attachment, log).pipe(
+            tap((result: ValueWithLogger) => {
+                window.open(result.value);
+                startLog.complete();
+            })
+        );
+    }
+
+    private logStart(log: Logger, page: PouchWikiPage, attachment: PouchWikiAttachment,
+                     dsc = "openAttachment") {
+        return log.start(LOG_NAME, dsc,
+            {page: page.getName(), attachment: attachment.name});
+    }
+
+    saveAttachment(page: PouchWikiPage, attachment: PouchWikiAttachment, log: Logger) {
+        const startLog = this.logStart(log, page, attachment, "saveAttachment");
+        return fromPromise(this.getDB().getPouchDB().putAttachment(
+            page.getId(), attachment.name, page.getRev(), attachment.data, attachment.content_type
+        )).pipe(
+            concatMap(() => {
+                startLog.complete();
+                return this.getPage(page.getName(), log);
+            })
+        );
+    }
+
+    deleteAttachment(page: PouchWikiPage, attachment: PouchWikiAttachment, log: Logger):
+            Observable<ValueWithLogger> {
+        const startLog = this.logStart(log, page, attachment, "deleteAttachment");
+        return fromPromise(this.getDB().getPouchDB().removeAttachment(page.getId(), attachment.name,
+            page.getRev())).pipe(
+                concatMap(() => {
+                    startLog.complete();
+                    return this.getDB().getDocument(page.getId(), log);
+                }),
         );
     }
 }

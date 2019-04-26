@@ -1,3 +1,11 @@
 <input type="file" (change)="onFileChange($event)" #file>
 
-<img [src]="url"/>
+<ng-container *ngIf="attachments$ | async as attachments">
+    <ul>
+        <li *ngFor="let attachment of attachments">
+            <button mat-raised-button (click)="download(attachment)">
+            {{attachment.name}}</button> <button mat-raised-button
+                (click)="delete(attachment)">Delete</button>
+        </li>
+    </ul>
+</ng-container>
