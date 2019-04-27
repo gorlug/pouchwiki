@@ -6,6 +6,8 @@ import {PouchWikiPage} from "../PouchWikiPage";
 import {ActivatedRoute, NavigationStart, Router} from "@angular/router";
 import {filter} from "rxjs/operators";
 import {LoggingService} from "../logging.service";
+import {PouchWikiPageToHtmlRenderer} from "../renderer";
+import {DomSanitizer} from "@angular/platform-browser";
 
 const LOG_NAME = "PageComponent";
 
@@ -24,7 +26,8 @@ export class PageComponent implements OnInit, AfterViewInit {
     constructor(private pageService: PageService,
                 private route: ActivatedRoute,
                 private router: Router,
-                private loggingService: LoggingService) {
+                private loggingService: LoggingService,
+                private sanitizer: DomSanitizer) {
     }
 
     private getLogger() {
@@ -71,12 +74,17 @@ export class PageComponent implements OnInit, AfterViewInit {
             const page: PouchWikiPage = result.value;
             this.currentPage = page;
             this.pageName$.next(page.getName());
-            this.html$.next(page.toHtml());
+            this.renderPage(page, log);
             this.pageExists = true;
         }, pageName => {
             this.pageExists = false;
             this.pageName$.next(pageName);
             this.html$.next("page not found");
         });
+    }
+
+    private renderPage(page: PouchWikiPage, log: Logger) {
+        const renderer = new PouchWikiPageToHtmlRenderer(this.pageService, page, this.sanitizer);
+        renderer.render(this.html$, log);
     }
 }

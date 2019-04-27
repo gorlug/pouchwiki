@@ -26,7 +26,6 @@ export interface PouchWikiAttachment {
 export class PouchWikiPage extends PouchDBDocument<PouchWikiDocument> {
 
     text: string;
-    renderer = new PouchWikiPageToHtmlRenderer();
     attachments = {};
 
     constructor(name: string) {
@@ -48,13 +47,12 @@ export class PouchWikiPage extends PouchDBDocument<PouchWikiDocument> {
         this.text = text;
     }
 
-    toHtml() {
-        return this.renderer.render(this.text);
+    getAttachmentNames(): string[] {
+        return Object.keys(this.attachments);
     }
 
-    getAttachmentNames(): string[] {
-        console.log("getAttachmentNames", this.attachments);
-        return Object.keys(this.attachments);
+    hasAttachment(name: string) {
+        return this.attachments[name] !== undefined;
     }
 
     protected addValuesToJSONDocument(json: PouchWikiDocument): any {
