@@ -32,6 +32,7 @@ export class PouchWikiPage extends PouchDBDocument<PouchWikiDocument> {
         super();
         name = PouchWikiPageToHtmlRenderer.sanitizeName(name);
         this.docVersion = AppVersion.VERSION;
+        this.docName = "PouchWikiPage";
         this.setId(name);
     }
 
@@ -48,6 +49,9 @@ export class PouchWikiPage extends PouchDBDocument<PouchWikiDocument> {
     }
 
     getAttachmentNames(): string[] {
+        if (this.attachments === undefined) {
+            return [];
+        }
         return Object.keys(this.attachments);
     }
 
@@ -62,6 +66,13 @@ export class PouchWikiPage extends PouchDBDocument<PouchWikiDocument> {
 
     protected getNameOfDoc(): string {
         return "PouchWikiPage";
+    }
+
+    copyToNewPage(name: string) {
+        const newPage = new PouchWikiPage(name);
+        newPage.setText(this.getText());
+        newPage.attachments = this.attachments;
+        return newPage;
     }
 
 }

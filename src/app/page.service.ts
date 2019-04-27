@@ -177,4 +177,42 @@ export class PageService extends AbstractPouchDBService {
         });
         return Object.keys(uniquePages);
     }
+
+    rename(page: PouchWikiPage, newName: string, log: Logger) {
+        newName = PouchWikiPageToHtmlRenderer.sanitizeName(newName);
+        const startLog = log.start(LOG_NAME, `rename ${page.getName()} to ${newName}`,
+            {page: page.getName(), newName});
+        return this.checkIfPageAlreadyExists(newName, log).pipe(
+            concatMap((result: ValueWithLogger) => {
+                return this.copyPage(page, newName, log);
+            }),
+            concatMap((result: ValueWithLogger) => {
+                startLog.complete();
+                return this.getDB().deleteDocument(page, log);
+            })
+        );
+    }
+
+    private checkIfPageAlreadyExists(newName: string, log: Logger) {
+        return this.getPage(newName, log).pipe(
+            concatMap((result: ValueWithLogger) => {
+                return throwError({exists: true});
+            }),
+            catchError(error => {
+                if (error.exists) {
+                    return throwError(`Page ${newName} already exists`);
+                }
+                return log.addTo(of(true));
+            })
+        );
+    }
+
+    private copyPage(page: PouchWikiPage, newName: string, log: Logger) {
+        const startLog = log.start(LOG_NAME, `copy ${page.getName()} to ${newName}`,
+            {page: page.getName(), newName});
+        const newPage = page.copyToNewPage(newName);
+        return this.getDB().saveDocument(newPage, log).pipe(
+            tap(() => startLog.complete())
+        );
+    }
 }

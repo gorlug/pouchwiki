@@ -4,10 +4,11 @@ import {PageService} from "../page.service";
 import {Logger, ValueWithLogger} from "@gorlug/pouchdb-rxjs";
 import {PouchWikiPage} from "../PouchWikiPage";
 import {ActivatedRoute, NavigationStart, Router} from "@angular/router";
-import {filter} from "rxjs/operators";
+import {concatMap, filter} from "rxjs/operators";
 import {LoggingService} from "../logging.service";
 import {PouchWikiPageToHtmlRenderer} from "../renderer";
 import {DomSanitizer} from "@angular/platform-browser";
+import {fromPromise} from "rxjs/internal-compatibility";
 
 const LOG_NAME = "PageComponent";
 
@@ -86,5 +87,31 @@ export class PageComponent implements OnInit, AfterViewInit {
     private renderPage(page: PouchWikiPage, log: Logger) {
         const renderer = new PouchWikiPageToHtmlRenderer(this.pageService, page, this.sanitizer);
         renderer.render(this.html$, log);
+    }
+
+    rename() {
+        const pageName = this.currentPage.getName();
+        let newName = window.prompt("Enter new name for page " + pageName);
+        const log = this.loggingService.getLogger();
+        const startLog = log.start(LOG_NAME, `rename ${pageName} to ${newName}`,
+            {page: pageName, newName}
+        );
+        if (newName === null || newName.length === 0) {
+            startLog.complete();
+            return;
+        }
+        newName = PouchWikiPageToHtmlRenderer.sanitizeName(newName);
+        this.pageService.rename(this.currentPage, newName, log).pipe(
+            concatMap((result: ValueWithLogger) => {
+                return result.log.addTo(
+                    fromPromise(this.router.navigateByUrl("/page/" + newName))
+                );
+            })
+        ).subscribe(next => {
+            startLog.complete();
+        }, error => {
+            startLog.complete();
+            window.alert(error);
+        });
     }
 }

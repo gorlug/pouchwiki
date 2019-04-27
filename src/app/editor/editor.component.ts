@@ -84,9 +84,7 @@ export class EditorComponent implements OnInit {
 
     private navigateToCurrentPage(startLog) {
         const url = "/page/" + this.page.getName();
-        console.log("page name", this.page.getName(), url);
         fromPromise(this.router.navigateByUrl(url)).subscribe(result => {
-            console.log("result", result);
             startLog.complete();
         });
     }
