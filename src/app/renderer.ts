@@ -2,14 +2,20 @@ import * as marked from "marked";
 import * as camelCase from "camelcase";
 import {PouchWikiPage} from "./PouchWikiPage";
 import {PageService} from "./page.service";
-import {of, Subject} from "rxjs";
+import {of, Subject, zip} from "rxjs";
 import {Logger, ValueWithLogger} from "@gorlug/pouchdb-rxjs";
 import {concatMap} from "rxjs/operators";
 import {DomSanitizer} from "@angular/platform-browser";
 
+interface AttachmentUrl {
+    name: string;
+    url: string;
+}
+
 export class PouchWikiPageToHtmlRenderer {
 
     renderer: any;
+    uniqueImageAttachments = {};
     imageAttachments: string[] = [];
 
     static sanitizeName(name: string) {
@@ -52,21 +58,53 @@ export class PouchWikiPageToHtmlRenderer {
 
     private checkForImageAttachment(href: string) {
         if (this.page.hasAttachment(href)) {
-            this.imageAttachments.push(href);
+            this.uniqueImageAttachments[href] = true;
         }
     }
 
     private replaceAttachmentImageLinks(html: string, log: Logger) {
+        this.imageAttachments = Object.keys(this.uniqueImageAttachments);
         if (this.imageAttachments.length === 0) {
             return log.addTo(of(html));
         }
-        const attachment = this.imageAttachments[0];
-        return this.pageService.getAttachmentData(this.page, attachment, log).pipe(
-            concatMap((result: ValueWithLogger) => {
-                const url = result.value;
-                html = html.replace(attachment, url);
-                return log.addTo(of(html));
+        const getAttachmentDataObservables = this.createArrayOfGetAttachmentDatabObservables(log);
+        const attachmentDataObservable = zip.apply(undefined, getAttachmentDataObservables);
+        return attachmentDataObservable.pipe(
+            concatMap( (resultArray: {value: AttachmentUrl, log: Logger}[]) => {
+                return this.extracted(resultArray, html, log);
             })
         );
+    }
+
+    private createArrayOfGetAttachmentDatabObservables(log: Logger) {
+        const getAttachmentDataObservables = [];
+        this.imageAttachments.forEach(name => {
+            getAttachmentDataObservables.push(
+                this.createGetAttachmentDataObservable(name, log)
+            );
+        });
+        return getAttachmentDataObservables;
+    }
+
+    private createGetAttachmentDataObservable(name, log: Logger) {
+        return this.pageService.getAttachmentData(this.page, name, log).pipe(
+            concatMap((result: ValueWithLogger) => {
+                return result.log.addTo(of({
+                    name: name,
+                    url: result.value
+                }));
+            })
+        );
+    }
+
+    private extracted(resultArray: { value: AttachmentUrl; log: Logger }[], html: string, log: Logger) {
+        resultArray.forEach(result => {
+            html = this.replaceImageAttachmentWithUrl(html, result.value);
+        });
+        return log.addTo(of(html));
+    }
+
+    private replaceImageAttachmentWithUrl(html: string, value: AttachmentUrl) {
+        return html.replace(new RegExp(value.name, "g"), value.url);
     }
 }
