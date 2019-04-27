@@ -5,7 +5,7 @@ import {ActivatedRoute, ParamMap} from "@angular/router";
 import {switchMap} from "rxjs/internal/operators/switchMap";
 import {of} from "rxjs/internal/observable/of";
 import {concatMap} from "rxjs/internal/operators/concatMap";
-import {Observable, throwError, zip} from "rxjs";
+import {BehaviorSubject, Observable, throwError, zip} from "rxjs";
 import {catchError, tap} from "rxjs/operators";
 import {PouchWikiPageToHtmlRenderer} from "./renderer";
 import {AbstractPouchDBService} from "./AbstractPouchDBService";
@@ -27,6 +27,8 @@ const LOG_NAME = "PageService";
     providedIn: "root"
 })
 export class PageService extends AbstractPouchDBService {
+
+    pageTitle$ = new BehaviorSubject("Home");
 
     constructor(protected loggingService: LoggingService,
                 protected loginService: LoginService) {
@@ -52,6 +54,7 @@ export class PageService extends AbstractPouchDBService {
                 return of(currentPage);
             }),
             concatMap((pageName: string) => {
+               this.pageTitle$.next(pageName);
                return this.getPage(pageName, log);
             }),
             catchError(() => {

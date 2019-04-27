@@ -1,14 +1,10 @@
-<a routerLink="/page/Home">Home</a>
+<div id="pageContent">
+    <button mat-raised-button routerLink="/edit/{{pageName$ | async}}">Edit</button>
 
-<a routerLink="/edit/{{pageName$ | async}}">Edit</a>
+    <button mat-raised-button routerLink="/attachments/{{pageName$ | async}}">Attachments</button>
 
-<a routerLink="/attachments/{{pageName$ | async}}">Attachments</a>
-
-<input type="button" (click)="delete()" value="Delete">
-
-<a routerLink="/index">Index</a>
-
-<a routerLink="/search">Search</a>
+    <button mat-raised-button (click)="delete()">Delete</button>
 
 
-<div [innerHTML]="html$ | async" class="content"></div>
+    <div [innerHTML]="html$ | async" class="content"></div>
+</div>

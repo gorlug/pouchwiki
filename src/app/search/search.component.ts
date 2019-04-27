@@ -17,6 +17,7 @@ export class SearchComponent implements OnInit {
 
     constructor(private loggingService: LoggingService,
                 private pageService: PageService) {
+        this.pageService.pageTitle$.next("Search");
     }
 
     ngOnInit() {

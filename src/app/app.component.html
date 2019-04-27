@@ -2,5 +2,16 @@
     <app-login></app-login>
 </div>
 <ng-template #loggedIn>
+    <mat-toolbar color="primary">
+        <span class="title">{{ this.pageService.pageTitle$ | async }}</span>
+
+        <span class="fill-space"></span>
+
+        <button mat-raised-button routerLink="/page/Home">Home</button>
+
+        <button mat-raised-button routerLink="/index">Index</button>
+
+        <button mat-raised-button routerLink="/search">Search</button>
+    </mat-toolbar>
     <router-outlet></router-outlet>
 </ng-template>
