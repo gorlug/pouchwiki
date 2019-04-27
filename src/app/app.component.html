@@ -6,12 +6,14 @@
         <span class="title">{{ this.pageService.pageTitle$ | async }}</span>
 
         <span class="fill-space"></span>
-
-        <button mat-raised-button routerLink="/page/Home">Home</button>
-
-        <button mat-raised-button routerLink="/index">Index</button>
-
-        <button mat-raised-button routerLink="/search">Search</button>
+        <mat-menu #appMenu="matMenu">
+            <button mat-menu-item routerLink="/page/Home">Home</button>
+            <button mat-menu-item routerLink="/index">Index</button>
+            <button mat-menu-item routerLink="/search">Search</button>
+        </mat-menu>
+        <button mat-raised-button [matMenuTriggerFor]="appMenu" id="actions">
+            Menu
+        </button>
     </mat-toolbar>
     <router-outlet></router-outlet>
 </ng-template>

@@ -57,12 +57,14 @@ export class EditorComponent implements OnInit {
             highlightActiveLine: true,
             minLines: 10,
             maxLines: Infinity,
+
         };
 
         this.codeEditor = ace.edit(element, editorOptions);
         this.codeEditor.setTheme(THEME);
         this.codeEditor.getSession().setMode(LANG);
         this.codeEditor.getSession().setValue(text);
+        this.codeEditor.getSession().setUseWrapMode(true);
     }
 
     save() {
