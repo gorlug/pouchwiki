@@ -5,13 +5,21 @@ import {ActivatedRoute, ParamMap} from "@angular/router";
 import {switchMap} from "rxjs/internal/operators/switchMap";
 import {of} from "rxjs/internal/observable/of";
 import {concatMap} from "rxjs/internal/operators/concatMap";
-import {Observable, throwError} from "rxjs";
+import {Observable, throwError, zip} from "rxjs";
 import {catchError, tap} from "rxjs/operators";
 import {PouchWikiPageToHtmlRenderer} from "./renderer";
 import {AbstractPouchDBService} from "./AbstractPouchDBService";
 import {LoggingService} from "./logging.service";
 import {LoginCredentials, LoginService} from "./login.service";
 import {fromPromise} from "rxjs/internal-compatibility";
+// @ts-ignore
+import PouchDB from "pouchdb-core";
+// @ts-ignore
+import pouchdb_find from "pouchdb-find";
+import {Content} from "@angular/compiler/src/render3/r3_ast";
+import FindRequest = PouchDB.Find.FindRequest;
+
+PouchDB.plugin(pouchdb_find);
 
 const LOG_NAME = "PageService";
 
@@ -115,5 +123,55 @@ export class PageService extends AbstractPouchDBService {
                     return this.getDB().getDocument(page.getId(), log);
                 }),
         );
+    }
+
+    search(query: string, log: Logger) {
+        const startLog = log.start(LOG_NAME, "search for query " + query, {query: query});
+        const queries = [
+            this.createPageNameQuery(query, log),
+            this.createTextQuery(query, log)
+        ];
+        return zip.apply(undefined, queries).pipe(
+            concatMap((results: []) => {
+                const pages = this.collectPages(results).sort();
+                return log.addTo(of(pages));
+            })
+        );
+    }
+
+    private createPageNameQuery(query: string, log: Logger) {
+        return this.createQueryObservable({
+            selector: {
+                _id: {
+                    // @ts-ignore
+                    $regex: RegExp(query, "i"),
+                },
+            },
+        });
+    }
+
+    private createTextQuery(query: string, log: Logger) {
+        return this.createQueryObservable({
+            selector: {
+                text: {
+                    // @ts-ignore
+                    $regex: RegExp(query, "i"),
+                },
+            },
+        });
+    }
+
+    private createQueryObservable(request: FindRequest<Content>) {
+        return fromPromise(this.getDB().getPouchDB().find(request));
+    }
+
+    private collectPages(results: []) {
+        const uniquePages = {};
+        results.forEach((result: any) => {
+            result.docs.forEach(doc => {
+                uniquePages[doc._id] = true;
+            });
+        });
+        return Object.keys(uniquePages);
     }
 }

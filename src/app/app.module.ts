@@ -13,12 +13,14 @@ import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {ServiceWorkerModule} from "@angular/service-worker";
 import {environment} from "../environments/environment";
 import {AttachmentsComponent} from "./attachments/attachments.component";
+import {SearchComponent} from "./search/search.component";
 
 const appRoutes: Routes = [
     {path: "page/:id", component: ContentComponent},
     {path: "edit/:id", component: EditorComponent},
     {path: "index", component: IndexComponent},
     {path: "attachments/:id", component: AttachmentsComponent},
+    {path: "search", component: SearchComponent},
     {path: "", redirectTo: "/page/Home", pathMatch: "full"},
 ];
 
@@ -30,7 +32,8 @@ const appRoutes: Routes = [
         EditorComponent,
         IndexComponent,
         LoginComponent,
-        AttachmentsComponent
+        AttachmentsComponent,
+        SearchComponent
     ],
     imports: [
         RouterModule.forRoot(appRoutes, {useHash: true}),
