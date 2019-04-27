@@ -64,11 +64,11 @@ export class PageService extends AbstractPouchDBService {
         return new PouchWikiPageGenerator();
     }
 
-    getAttachmentData(page: PouchWikiPage, attachment: PouchWikiAttachment, log: Logger): Observable<ValueWithLogger> {
+    getAttachmentData(page: PouchWikiPage, name: string, log: Logger): Observable<ValueWithLogger> {
         const startLog = log.start(LOG_NAME, "getAttachmentData of page " + page.getName()
-            + " and name " + attachment.name,
+            + " and name " + name,
             {page: page.getName(), name: name});
-        return fromPromise(this.getDB().getPouchDB().getAttachment(page.getId(), attachment.name)).pipe(
+        return fromPromise(this.getDB().getPouchDB().getAttachment(page.getId(), name)).pipe(
             concatMap(blob => {
                 const url = URL.createObjectURL(blob);
                 startLog.complete();
@@ -77,9 +77,9 @@ export class PageService extends AbstractPouchDBService {
         );
     }
 
-    openAttachment(page: PouchWikiPage, attachment: PouchWikiAttachment, log: Logger) {
-        const startLog = this.logStart(log, page, attachment);
-        return this.getAttachmentData(page, attachment, log).pipe(
+    openAttachment(page: PouchWikiPage, name: string, log: Logger) {
+        const startLog = this.logStart(log, page, name);
+        return this.getAttachmentData(page, name, log).pipe(
             tap((result: ValueWithLogger) => {
                 window.open(result.value);
                 startLog.complete();
@@ -87,14 +87,14 @@ export class PageService extends AbstractPouchDBService {
         );
     }
 
-    private logStart(log: Logger, page: PouchWikiPage, attachment: PouchWikiAttachment,
+    private logStart(log: Logger, page: PouchWikiPage, name: string,
                      dsc = "openAttachment") {
         return log.start(LOG_NAME, dsc,
-            {page: page.getName(), attachment: attachment.name});
+            {page: page.getName(), attachment: name});
     }
 
     saveAttachment(page: PouchWikiPage, attachment: PouchWikiAttachment, log: Logger) {
-        const startLog = this.logStart(log, page, attachment, "saveAttachment");
+        const startLog = this.logStart(log, page, attachment.name, "saveAttachment");
         return fromPromise(this.getDB().getPouchDB().putAttachment(
             page.getId(), attachment.name, page.getRev(), attachment.data, attachment.content_type
         )).pipe(
@@ -105,10 +105,10 @@ export class PageService extends AbstractPouchDBService {
         );
     }
 
-    deleteAttachment(page: PouchWikiPage, attachment: PouchWikiAttachment, log: Logger):
+    deleteAttachment(page: PouchWikiPage, name: string, log: Logger):
             Observable<ValueWithLogger> {
-        const startLog = this.logStart(log, page, attachment, "deleteAttachment");
-        return fromPromise(this.getDB().getPouchDB().removeAttachment(page.getId(), attachment.name,
+        const startLog = this.logStart(log, page, name, "deleteAttachment");
+        return fromPromise(this.getDB().getPouchDB().removeAttachment(page.getId(), name,
             page.getRev())).pipe(
                 concatMap(() => {
                     startLog.complete();

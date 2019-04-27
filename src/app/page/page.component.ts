@@ -41,7 +41,6 @@ export class PageComponent implements OnInit, AfterViewInit {
                 return (event instanceof NavigationStart);
             })
         ).subscribe((event: NavigationStart) => {
-            console.log(event, this.pageExists);
             if (event.restoredState !== null && !this.pageExists) {
                 this.refresh();
             }

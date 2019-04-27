@@ -2,13 +2,18 @@ import {PouchDBDocument, PouchDBDocumentGenerator, PouchDBDocumentJSON, PouchDBD
 import {PouchWikiPageToHtmlRenderer} from "./renderer";
 import {AppVersion} from "./app.version";
 
+export interface PouchDBAttachment {
+    content_type: string;
+    digest: string;
+    length: number;
+    revpos: number;
+    stub: boolean;
+}
+
 export interface PouchWikiDocument extends PouchDBDocumentJSON {
     text: string;
     _attachments: {
-        [filename: string]: {
-            content_type: string,
-            data: any
-        }
+        [filename: string]: PouchDBAttachment;
     };
 }
 
@@ -22,7 +27,7 @@ export class PouchWikiPage extends PouchDBDocument<PouchWikiDocument> {
 
     text: string;
     renderer = new PouchWikiPageToHtmlRenderer();
-    attachments: PouchWikiAttachment[] = [];
+    attachments = {};
 
     constructor(name: string) {
         super();
@@ -47,25 +52,14 @@ export class PouchWikiPage extends PouchDBDocument<PouchWikiDocument> {
         return this.renderer.render(this.text);
     }
 
-    addAttachment(attachment: PouchWikiAttachment) {
-        this.attachments.push(attachment);
-    }
-
-    deleteAttachment(attachment: PouchWikiAttachment) {
-        this.attachments = this.attachments.filter(currentAttachment => {
-            return currentAttachment.name !== attachment.name;
-        });
+    getAttachmentNames(): string[] {
+        console.log("getAttachmentNames", this.attachments);
+        return Object.keys(this.attachments);
     }
 
     protected addValuesToJSONDocument(json: PouchWikiDocument): any {
         json.text = this.text;
-        json._attachments = {};
-        this.attachments.forEach(attachment => {
-            json._attachments[attachment.name] = {
-                content_type: attachment.content_type,
-                data: attachment.data
-            };
-        });
+        json._attachments = this.attachments;
     }
 
     protected getNameOfDoc(): string {
@@ -77,25 +71,11 @@ export class PouchWikiPage extends PouchDBDocument<PouchWikiDocument> {
 export class PouchWikiPageGenerator extends PouchDBDocumentGenerator<PouchWikiPage> {
 
     protected createDocument(json: PouchWikiDocument): PouchWikiPage {
+        console.log("load page", json);
         const page = new PouchWikiPage(json._id);
         page.text = json.text;
-        this.addAttachments(page, json);
+        page.attachments = json._attachments;
         return page;
-    }
-
-    private addAttachments(page: PouchWikiPage, json: PouchWikiDocument) {
-        if (json._attachments === undefined) {
-            return;
-        }
-        // tslint:disable-next-line:forin
-        for (const name in json._attachments) {
-            const value = json._attachments[name];
-            page.addAttachment({
-                name: name,
-                content_type: value.content_type,
-                data: undefined
-            });
-        }
     }
 }
 
