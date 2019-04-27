@@ -52,7 +52,7 @@ export class PouchWikiPage extends PouchDBDocument<PouchWikiDocument> {
     }
 
     hasAttachment(name: string) {
-        return this.attachments[name] !== undefined;
+        return this.attachments !== undefined && this.attachments[name] !== undefined;
     }
 
     protected addValuesToJSONDocument(json: PouchWikiDocument): any {

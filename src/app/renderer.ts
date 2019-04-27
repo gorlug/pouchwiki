@@ -15,8 +15,9 @@ interface AttachmentUrl {
 export class PouchWikiPageToHtmlRenderer {
 
     renderer: any;
-    uniqueImageAttachments = {};
-    imageAttachments: string[] = [];
+    uniqueAttachments = {};
+    attachments: string[] = [];
+    readonly attachmentLinkSuffix = "_attachment_link";
 
     static sanitizeName(name: string) {
         return camelCase(name, {pascalCase: true});
@@ -30,11 +31,23 @@ export class PouchWikiPageToHtmlRenderer {
 
     private initRenderer() {
         this.renderer = new marked.Renderer();
+        this.overwriteRendererImage();
+        this.overwriteRendererLink();
+    }
+
+    private overwriteRendererImage() {
         const originalImage = this.renderer.image;
         this.renderer.image = (href: string, title: string, text: string) => {
-            console.log("image", href, title, text);
-            this.checkForImageAttachment(href);
+            this.checkForAttachment(href);
             return originalImage.call(this.renderer, href, title, text);
+        };
+    }
+
+    private overwriteRendererLink() {
+        const originalLink = this.renderer.link;
+        this.renderer.link = (href: string, title: string, text: string) => {
+            this.checkForAttachment(href);
+            return originalLink.call(this.renderer, href, title, text);
         };
     }
 
@@ -42,7 +55,7 @@ export class PouchWikiPageToHtmlRenderer {
         let text = this.page.getText();
         text = this.convertPageLinks(text);
         const html = marked(text, {renderer: this.renderer});
-        this.replaceAttachmentImageLinks(html, log).subscribe((result: ValueWithLogger) => {
+        this.replaceAttachmentLinks(html, log).subscribe((result: ValueWithLogger) => {
             const sanitizedHtml: any = this.sanitizer.bypassSecurityTrustHtml(result.value);
             subject.next(sanitizedHtml);
         });
@@ -50,35 +63,46 @@ export class PouchWikiPageToHtmlRenderer {
 
     convertPageLinks(text: string) {
         return text.replace(/\[([^\]]+)\](?!\()/g, (match, pageName) => {
-            pageName = PouchWikiPageToHtmlRenderer.sanitizeName(pageName);
-            match += `(/#/page/${pageName})`;
-            return match;
+            if (this.page.hasAttachment(pageName)) {
+                return this.handleAttachmentLink(pageName, match);
+            }
+            return this.handlePageLink(pageName, match);
         });
     }
 
-    private checkForImageAttachment(href: string) {
+    private handleAttachmentLink(name: any, match: string) {
+        this.uniqueAttachments[name] = true;
+        return `[${name}${this.attachmentLinkSuffix}](${name})`;
+    }
+
+    private handlePageLink(pageName, match) {
+        pageName = PouchWikiPageToHtmlRenderer.sanitizeName(pageName);
+        return match + `(/#/page/${pageName})`;
+    }
+
+    private checkForAttachment(href: string) {
         if (this.page.hasAttachment(href)) {
-            this.uniqueImageAttachments[href] = true;
+            this.uniqueAttachments[href] = true;
         }
     }
 
-    private replaceAttachmentImageLinks(html: string, log: Logger) {
-        this.imageAttachments = Object.keys(this.uniqueImageAttachments);
-        if (this.imageAttachments.length === 0) {
+    private replaceAttachmentLinks(html: string, log: Logger) {
+        this.attachments = Object.keys(this.uniqueAttachments);
+        if (this.attachments.length === 0) {
             return log.addTo(of(html));
         }
         const getAttachmentDataObservables = this.createArrayOfGetAttachmentDatabObservables(log);
         const attachmentDataObservable = zip.apply(undefined, getAttachmentDataObservables);
         return attachmentDataObservable.pipe(
             concatMap( (resultArray: {value: AttachmentUrl, log: Logger}[]) => {
-                return this.extracted(resultArray, html, log);
+                return this.replaceAllAttachmentsWithUrl(resultArray, html, log);
             })
         );
     }
 
     private createArrayOfGetAttachmentDatabObservables(log: Logger) {
         const getAttachmentDataObservables = [];
-        this.imageAttachments.forEach(name => {
+        this.attachments.forEach(name => {
             getAttachmentDataObservables.push(
                 this.createGetAttachmentDataObservable(name, log)
             );
@@ -97,14 +121,21 @@ export class PouchWikiPageToHtmlRenderer {
         );
     }
 
-    private extracted(resultArray: { value: AttachmentUrl; log: Logger }[], html: string, log: Logger) {
+    private replaceAllAttachmentsWithUrl(resultArray: { value: AttachmentUrl; log: Logger }[], html: string, log: Logger) {
         resultArray.forEach(result => {
-            html = this.replaceImageAttachmentWithUrl(html, result.value);
+            html = this.replaceAttachmentWithUrl(html, result.value);
+        });
+        resultArray.forEach(result => {
+            html = this.revertAttachmentLinks(html, result.value);
         });
         return log.addTo(of(html));
     }
 
-    private replaceImageAttachmentWithUrl(html: string, value: AttachmentUrl) {
+    private replaceAttachmentWithUrl(html: string, value: AttachmentUrl) {
         return html.replace(new RegExp(value.name, "g"), value.url);
+    }
+
+    private revertAttachmentLinks(html: string, value: AttachmentUrl) {
+        return html.replace(new RegExp(value.url + this.attachmentLinkSuffix, "g"), value.name);
     }
 }
