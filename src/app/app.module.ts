@@ -14,6 +14,7 @@ import {ServiceWorkerModule} from "@angular/service-worker";
 import {environment} from "../environments/environment";
 import {AttachmentsComponent} from "./attachments/attachments.component";
 import {SearchComponent} from "./search/search.component";
+import {SettingsComponent} from "./settings/settings.component";
 
 const appRoutes: Routes = [
     {path: "page/:id", component: ContentComponent},
@@ -21,6 +22,7 @@ const appRoutes: Routes = [
     {path: "index", component: IndexComponent},
     {path: "attachments/:id", component: AttachmentsComponent},
     {path: "search", component: SearchComponent},
+    {path: "settings", component: SettingsComponent},
     {path: "", redirectTo: "/page/Home", pathMatch: "full"},
 ];
 
@@ -33,7 +35,8 @@ const appRoutes: Routes = [
         IndexComponent,
         LoginComponent,
         AttachmentsComponent,
-        SearchComponent
+        SearchComponent,
+        SettingsComponent
     ],
     imports: [
         RouterModule.forRoot(appRoutes, {useHash: true}),

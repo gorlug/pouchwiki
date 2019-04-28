@@ -1,0 +1,22 @@
+<div *ngIf="!(loginService.status$ | async).online else onlineSettings">
+    <h2>Not logged in</h2>
+    <button mat-raised-button (click)="showLogin()">Login</button>
+</div>
+<ng-template #onlineSettings>
+    <h2>Credentials</h2>
+    <ng-container *ngIf="credentials$ | async as loginCredentials">
+        <button mat-raised-button (click)="logout()">Logout</button>
+        <dl>
+            <dt>User</dt>
+            <dd>{{loginCredentials.username}}</dd>
+        </dl>
+        <dl>
+            <dt>Server URL</dt>
+            <dd>{{loginCredentials.url}}</dd>
+        </dl>
+        <dl>
+            <dt>DB name</dt>
+            <dd>{{loginCredentials.db}}</dd>
+        </dl>
+    </ng-container>
+</ng-template>

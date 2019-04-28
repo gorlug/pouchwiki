@@ -1,4 +1,4 @@
-import {Component, NgZone} from "@angular/core";
+import {Component} from "@angular/core";
 import {
     AuthenticationError,
     AuthorizationError,
@@ -46,7 +46,7 @@ export class LoginComponent extends ObservableComponent {
     constructor(
         private loginService: LoginService,
         private loggingService: LoggingService,
-        private ngZone: NgZone) {
+    ) {
         super();
         this.setupErrorToMessageMappings();
     }
