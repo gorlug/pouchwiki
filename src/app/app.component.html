@@ -1,4 +1,5 @@
 <div *ngIf="(loginService.showLogin$ | async).value else loggedIn">
+    <h1><img class="logo" src="assets/icons/icon-72x72.png">PouchWiki</h1>
     <app-login></app-login>
 </div>
 <ng-template #loggedIn>
