@@ -1,11 +1,15 @@
 <div id="pageContent">
     <button mat-raised-button routerLink="/edit/{{pageName$ | async}}">Edit</button>
+    <span *ngIf="doesNotExist$ |  async else doesExist">
+        <button mat-raised-button (click)="goBack()">Go back</button>
+    </span>
+    <ng-template #doesExist>
+        <button mat-raised-button routerLink="/attachments/{{pageName$ | async}}">Attachments</button>
 
-    <button mat-raised-button routerLink="/attachments/{{pageName$ | async}}">Attachments</button>
+        <button mat-raised-button (click)="delete()">Delete</button>
 
-    <button mat-raised-button (click)="delete()">Delete</button>
-
-    <button mat-raised-button (click)="rename()">Rename</button>
+        <button mat-raised-button (click)="rename()">Rename</button>
+    </ng-template>
 
 
     <div [innerHTML]="html$ | async" class="content"></div>

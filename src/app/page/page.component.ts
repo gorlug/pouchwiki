@@ -9,6 +9,7 @@ import {LoggingService} from "../logging.service";
 import {PouchWikiPageToHtmlRenderer} from "../renderer";
 import {DomSanitizer} from "@angular/platform-browser";
 import {fromPromise} from "rxjs/internal-compatibility";
+import {Location} from "@angular/common";
 
 const LOG_NAME = "PageComponent";
 
@@ -23,12 +24,14 @@ export class PageComponent implements OnInit, AfterViewInit {
     pageName$: BehaviorSubject<string> = new BehaviorSubject("");
     pageExists = false;
     currentPage: PouchWikiPage;
+    doesNotExist$ = new BehaviorSubject(false);
 
     constructor(private pageService: PageService,
                 private route: ActivatedRoute,
                 private router: Router,
                 private loggingService: LoggingService,
-                private sanitizer: DomSanitizer) {
+                private sanitizer: DomSanitizer,
+                private location: Location) {
     }
 
     private getLogger() {
@@ -45,8 +48,12 @@ export class PageComponent implements OnInit, AfterViewInit {
                 return (event instanceof NavigationStart);
             })
         ).subscribe((event: NavigationStart) => {
-            if (event.restoredState !== null && !this.pageExists) {
-                this.refresh();
+            if (event.restoredState !== null) {
+                const log = this.loggingService.getLogger();
+                log.logMessage(LOG_NAME, "backButton");
+                fromPromise(this.router.navigateByUrl(window.location.hash.substring(1))).subscribe(() => {
+                    this.loadPageFromRoute(log);
+                });
             }
         });
     }
@@ -71,16 +78,27 @@ export class PageComponent implements OnInit, AfterViewInit {
     ngAfterViewInit(): void {
         const log = Logger.getLoggerTrace();
         log.logMessage(LOG_NAME, "ngAfterViewInit");
-        this.pageService.getPageFromRoute(this.route, log).subscribe((result: ValueWithLogger) => {
+        this.loadPageFromRoute(log);
+    }
+
+    private loadPageFromRoute(log) {
+        const observable = this.pageService.getPageFromRoute(this.route, log);
+        this.loadPageFromObservable(observable, log);
+    }
+
+    private loadPageFromObservable(observable, log) {
+        observable.subscribe((result: ValueWithLogger) => {
             const page: PouchWikiPage = result.value;
             this.currentPage = page;
             this.pageName$.next(page.getName());
             this.renderPage(page, log);
             this.pageExists = true;
+            this.doesNotExist$.next(false);
         }, pageName => {
             this.pageExists = false;
             this.pageName$.next(pageName);
             this.html$.next("page not found");
+            this.doesNotExist$.next(true);
         });
     }
 
@@ -113,5 +131,14 @@ export class PageComponent implements OnInit, AfterViewInit {
             startLog.complete();
             window.alert(error);
         });
+    }
+
+    goBack() {
+        const log = this.loggingService.getLogger();
+        log.logMessage(LOG_NAME, "goBack");
+        // fromPromise(this.router.navigateByUrl("/page/Home")).subscribe(() => {
+        //     this.loadPageFromRoute(log);
+        // });
+        window.history.back();
     }
 }
