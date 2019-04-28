@@ -18,7 +18,7 @@ export class SettingsComponent implements OnInit {
     credentials$: BehaviorSubject<LoginCredentials>;
 
     constructor(private loggingService: LoggingService,
-                private loginService: LoginService,
+                public loginService: LoginService,
                 private router: Router) {
     }
 
