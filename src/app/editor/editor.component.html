@@ -2,4 +2,9 @@
     <button mat-raised-button (click)="save()">Save</button>
     <button mat-raised-button (click)="cancel()">Cancel</button>
 </div>
+
+<div *ngIf="isAndroidOriOS()" class="editor">
+    <textarea id="textareaEditor" #textareaEditor></textarea>
+</div>
+
 <div class="code-editor" #codeEditor></div>

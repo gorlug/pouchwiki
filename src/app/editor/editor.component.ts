@@ -24,6 +24,7 @@ const LOG_NAME = "EditorComponent";
 export class EditorComponent implements OnInit {
 
     @ViewChild("codeEditor") codeEditorElmRef: ElementRef;
+    @ViewChild("textareaEditor") textareEditorRef: ElementRef;
     private codeEditor: ace.Ace.Editor;
 
     text$: BehaviorSubject<string> = new BehaviorSubject("");
@@ -52,6 +53,10 @@ export class EditorComponent implements OnInit {
     }
 
     private initEditor(text: string) {
+        if (this.isAndroidOriOS()) {
+            this.initAndroidiOSEditor(text);
+            return;
+        }
         const element = this.codeEditorElmRef.nativeElement;
         const editorOptions: Partial<ace.Ace.EditorOptions> = {
             highlightActiveLine: true,
@@ -70,12 +75,18 @@ export class EditorComponent implements OnInit {
     save() {
         const log = this.getLogger();
         const startLog = log.start(LOG_NAME, "save");
-        const text = this.codeEditor.getSession().getValue();
-        console.log(text);
+        const text = this.getEditorText();
         this.page.setText(text);
         this.pageService.getDB().saveDocument(this.page, log).subscribe(() => {
             this.navigateToCurrentPage(startLog);
         });
+    }
+
+    private getEditorText() {
+        if (this.isAndroidOriOS()) {
+            return this.textareEditorRef.nativeElement.value;
+        }
+        return this.codeEditor.getSession().getValue();
     }
 
     cancel() {
@@ -89,5 +100,14 @@ export class EditorComponent implements OnInit {
         fromPromise(this.router.navigateByUrl(url)).subscribe(result => {
             startLog.complete();
         });
+    }
+
+    isAndroidOriOS() {
+        const userAgent = navigator.userAgent || navigator.vendor;
+        return /android/i.test(userAgent) || /iPad|iPhone|iPod/.test(userAgent);
+    }
+
+    private initAndroidiOSEditor(text: string) {
+        this.textareEditorRef.nativeElement.value = text;
     }
 }
