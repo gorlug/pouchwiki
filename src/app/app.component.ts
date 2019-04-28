@@ -14,8 +14,6 @@ const LOG_NAME = "AppComponent";
 export class AppComponent implements OnInit {
     title = "pouchwiki";
 
-    // pageTitle$ = new BehaviorSubject("Home");
-
     constructor(public loginService: LoginService,
                 private loggingService: LoggingService,
                 private pageService: PageService,
@@ -23,12 +21,5 @@ export class AppComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        // const log = this.loggingService.getLogger();
-        // const startLog = log.start(LOG_NAME, "ngOnInit");
-        // this.pageService.getPageFromRoute(this.route, log).subscribe((result: ValueWithLogger) => {
-        //     const page: PouchWikiPage = result.value;
-        //     this.pageTitle$.next(page.getName());
-        //     startLog.complete();
-        // });
     }
 }

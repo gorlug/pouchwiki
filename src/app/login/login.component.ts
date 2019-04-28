@@ -92,4 +92,10 @@ export class LoginComponent extends ObservableComponent {
             db: db
         };
     }
+
+    offline() {
+        const log = this.loggingService.getLogger();
+        log.logMessage(LOG_NAME, "offline login");
+        this.loginService.showLogin$.next({value: false, log: log});
+    }
 }

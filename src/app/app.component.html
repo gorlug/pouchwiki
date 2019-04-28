@@ -7,6 +7,10 @@
         <span class="title">{{ this.pageService.pageTitle$ | async }}</span>
 
         <span class="fill-space"></span>
+        <span class="status">
+            <span class="dot {{(loginService.status$ | async).color}}"></span>
+            {{(loginService.status$ | async).name}}
+        </span>
         <mat-menu #appMenu="matMenu">
             <button mat-menu-item routerLink="/page/Home">Home</button>
             <button mat-menu-item routerLink="/index">Index</button>

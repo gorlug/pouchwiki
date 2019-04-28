@@ -250,6 +250,12 @@ class InitialLoginValuesLoader {
     }
 }
 
+export interface AppStatus {
+    online: boolean;
+    name: string;
+    color: string;
+}
+
 @Injectable({
     providedIn: "root"
 })
@@ -263,10 +269,13 @@ export class LoginService {
     logout$: Subject<{value: boolean, log: Logger}> = new Subject();
     private db: PouchDBWrapper;
 
+    status$: BehaviorSubject<AppStatus>;
+
     constructor(private onlineService: OnlineService,
                 private loggingService: LoggingService) {
         const log = loggingService.getLogger();
         this.setSubjectsDefaultValue(log);
+        this.initStatus();
         const initialSteps = [
             this.loadLocalDB(),
             this.loadInitialValues()
@@ -400,6 +409,25 @@ export class LoginService {
                 return this.db.saveDocument(loginCredentials, result.log);
             })
         );
+    }
+
+    private initStatus() {
+        this.status$ = new BehaviorSubject(this.getOfflineStatus());
+        this.doExternalAuthentication$.subscribe((next: LoginResultWithLogger) => {
+            if (next.value) {
+                this.status$.next(this.getOnlineStatus());
+            } else {
+                this.status$.next(this.getOfflineStatus());
+            }
+        });
+    }
+
+    private getOfflineStatus(): AppStatus {
+        return {online: false, name: "Offline", color: "red"};
+    }
+
+    private getOnlineStatus(): AppStatus {
+        return {online: true, name: "Online", color: "green"};
     }
 }
 

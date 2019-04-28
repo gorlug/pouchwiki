@@ -20,6 +20,12 @@
     Login
 </button>
 <p>
+    <button mat-raised-button (click)="offline()">Use locally</button>
+    <span class="warning">
+        Warning: All data is saved directly inside
+        the browser without sync to another server. If the browser data is cleared everything will be gone.
+    </span>
+<p>
 <div *ngIf="(showError$ | async).showError">
     <div class="error">{{showError$.getValue().message}}</div>
 </div>
