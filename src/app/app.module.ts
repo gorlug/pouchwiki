@@ -15,6 +15,7 @@ import {environment} from "../environments/environment";
 import {AttachmentsComponent} from "./attachments/attachments.component";
 import {SearchComponent} from "./search/search.component";
 import {SettingsComponent} from "./settings/settings.component";
+import {AboutComponent} from "./about/about.component";
 
 const appRoutes: Routes = [
     {path: "page/:id", component: ContentComponent},
@@ -23,6 +24,7 @@ const appRoutes: Routes = [
     {path: "attachments/:id", component: AttachmentsComponent},
     {path: "search", component: SearchComponent},
     {path: "settings", component: SettingsComponent},
+    {path: "about", component: AboutComponent},
     {path: "", redirectTo: "/page/Home", pathMatch: "full"},
 ];
 
@@ -36,7 +38,8 @@ const appRoutes: Routes = [
         LoginComponent,
         AttachmentsComponent,
         SearchComponent,
-        SettingsComponent
+        SettingsComponent,
+        AboutComponent
     ],
     imports: [
         RouterModule.forRoot(appRoutes, {useHash: true}),
