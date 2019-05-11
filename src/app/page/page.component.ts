@@ -10,6 +10,7 @@ import {PouchWikiPageToHtmlRenderer} from "../renderer";
 import {DomSanitizer} from "@angular/platform-browser";
 import {fromPromise} from "rxjs/internal-compatibility";
 import {Location} from "@angular/common";
+import {BreadcrumbsService} from "../breadcrumbs.service";
 
 const LOG_NAME = "PageComponent";
 
@@ -31,7 +32,8 @@ export class PageComponent implements OnInit, AfterViewInit {
                 private router: Router,
                 private loggingService: LoggingService,
                 private sanitizer: DomSanitizer,
-                private location: Location) {
+                private location: Location,
+                public breadcrumbsService: BreadcrumbsService) {
     }
 
     private getLogger() {
@@ -90,6 +92,7 @@ export class PageComponent implements OnInit, AfterViewInit {
         observable.subscribe((result: ValueWithLogger) => {
             const page: PouchWikiPage = result.value;
             this.currentPage = page;
+            this.breadcrumbsService.addPage(page, log);
             this.pageName$.next(page.getName());
             this.renderPage(page, log);
             this.pageExists = true;

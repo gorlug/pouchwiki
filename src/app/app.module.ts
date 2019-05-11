@@ -8,7 +8,7 @@ import {ContentComponent} from "./content/content.component";
 import {EditorComponent} from "./editor/editor.component";
 import {IndexComponent} from "./index/index.component";
 import {LoginComponent} from "./login/login.component";
-import {MatButtonModule, MatFormFieldModule, MatInputModule, MatMenuModule, MatToolbarModule} from "@angular/material";
+import {MatButtonModule, MatExpansionModule, MatFormFieldModule, MatInputModule, MatMenuModule, MatToolbarModule} from "@angular/material";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {ServiceWorkerModule} from "@angular/service-worker";
 import {environment} from "../environments/environment";
@@ -45,7 +45,7 @@ const appRoutes: Routes = [
         RouterModule.forRoot(appRoutes, {useHash: true}),
         BrowserModule,
         MatFormFieldModule, MatInputModule, BrowserAnimationsModule, MatToolbarModule, MatMenuModule,
-        ServiceWorkerModule.register("ngsw-worker.js", {enabled: environment.production}), MatButtonModule
+        ServiceWorkerModule.register("ngsw-worker.js", {enabled: environment.production}), MatButtonModule, MatExpansionModule
     ],
     providers: [],
     bootstrap: [AppComponent]
