@@ -14,7 +14,7 @@
         <button mat-raised-button [matMenuTriggerFor]="appMenu" id="actions">
             Menu
         </button>
-        <img class="logo" src="assets/logo.png">
+        <a routerLink="/page/Home"><img class="logo" src="assets/logo.png" alt="Go to Home"></a>
         <span class="title">{{ this.pageService.pageTitle$ | async }}</span>
 
         <span class="fill-space"></span>

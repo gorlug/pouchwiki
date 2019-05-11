@@ -1,16 +1,35 @@
 <div id="pageContent">
-    <button mat-raised-button routerLink="/edit/{{pageName$ | async}}">Edit</button>
-    <span *ngIf="doesNotExist$ |  async else doesExist">
+    <mat-expansion-panel>
+        <mat-expansion-panel-header>
+            <mat-panel-title>
+                Breadcrumbs
+            </mat-panel-title>
+            <mat-panel-description>
+                Previously visited pages
+            </mat-panel-description>
+        </mat-expansion-panel-header>
+        <ng-container *ngIf="breadcrumbsService.breadcrumbs$ | async as pages">
+            <ng-container *ngFor="let pageName of pages; let isLast = last">
+                <a routerLink="/page/{{pageName}}">{{pageName}}</a>
+                <ng-container *ngIf="!isLast">, </ng-container>
+            </ng-container>
+        </ng-container>
+    </mat-expansion-panel>
+
+    <p>
+        <button mat-raised-button routerLink="/edit/{{pageName$ | async}}">Edit</button>
+        <span *ngIf="doesNotExist$ |  async else doesExist">
         <button mat-raised-button (click)="goBack()">Go back</button>
     </span>
-    <ng-template #doesExist>
-        <button mat-raised-button routerLink="/attachments/{{pageName$ | async}}">Attachments</button>
 
-        <button mat-raised-button (click)="delete()">Delete</button>
+        <ng-template #doesExist>
+            <button mat-raised-button routerLink="/attachments/{{pageName$ | async}}">Attachments</button>
 
-        <button mat-raised-button (click)="rename()">Rename</button>
-    </ng-template>
+            <button mat-raised-button (click)="delete()">Delete</button>
 
+            <button mat-raised-button (click)="rename()">Rename</button>
+        </ng-template>
+    </p>
 
     <div [innerHTML]="html$ | async" class="content"></div>
 </div>
