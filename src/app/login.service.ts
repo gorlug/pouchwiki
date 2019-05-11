@@ -286,7 +286,7 @@ export class LoginService {
     }
 
     private setSubjectsDefaultValue(log) {
-        this.showLogin$ = new BehaviorSubject({value: true, log: log});
+        this.showLogin$ = new BehaviorSubject({value: false, log: log});
         this.initialized$ = new BehaviorSubject({value: false, log: log});
         this.doExternalAuthentication$ = new BehaviorSubject({value: false, log: log});
     }
