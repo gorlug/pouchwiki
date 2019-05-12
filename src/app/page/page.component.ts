@@ -1,16 +1,17 @@
 import {AfterViewInit, Component, OnInit} from "@angular/core";
-import {BehaviorSubject} from "rxjs";
+import {BehaviorSubject, zip} from "rxjs";
 import {PageService} from "../page.service";
 import {Logger, ValueWithLogger} from "@gorlug/pouchdb-rxjs";
 import {PouchWikiPage} from "../PouchWikiPage";
 import {ActivatedRoute, NavigationStart, Router} from "@angular/router";
-import {concatMap, filter} from "rxjs/operators";
+import {catchError, concatMap, filter, tap} from "rxjs/operators";
 import {LoggingService} from "../logging.service";
 import {PouchWikiPageToHtmlRenderer} from "../renderer";
 import {DomSanitizer} from "@angular/platform-browser";
 import {fromPromise} from "rxjs/internal-compatibility";
 import {Location} from "@angular/common";
 import {BreadcrumbsService} from "../breadcrumbs.service";
+import {defaultPages} from "../../default_pages";
 
 const LOG_NAME = "PageComponent";
 
@@ -20,6 +21,8 @@ const LOG_NAME = "PageComponent";
     styleUrls: ["./page.component.sass"]
 })
 export class PageComponent implements OnInit, AfterViewInit {
+
+    readonly startPageName = "Home";
 
     html$: BehaviorSubject<string> = new BehaviorSubject("Loading...");
     pageName$: BehaviorSubject<string> = new BehaviorSubject("");
@@ -97,12 +100,24 @@ export class PageComponent implements OnInit, AfterViewInit {
             this.renderPage(page, log);
             this.pageExists = true;
             this.doesNotExist$.next(false);
-        }, pageName => {
-            this.pageExists = false;
-            this.pageName$.next(pageName);
-            this.html$.next("page not found");
-            this.doesNotExist$.next(true);
+        }, (pageName: string) => {
+            if (this.isDefaultPage(pageName)) {
+                this.createDefaultPages(log);
+            } else {
+                this.showPageDoesNotExistMessage(pageName);
+            }
         });
+    }
+
+    private isDefaultPage(pageName: string) {
+        return defaultPages[pageName] !== undefined;
+    }
+
+    private showPageDoesNotExistMessage(pageName: string) {
+        this.pageExists = false;
+        this.pageName$.next(pageName);
+        this.html$.next("page not found");
+        this.doesNotExist$.next(true);
     }
 
     private renderPage(page: PouchWikiPage, log: Logger) {
@@ -143,5 +158,37 @@ export class PageComponent implements OnInit, AfterViewInit {
         //     this.loadPageFromRoute(log);
         // });
         window.history.back();
+    }
+
+    private createDefaultPages(log: Logger) {
+        const start = log.start(LOG_NAME, "createDefaultPages");
+        const observables = this.collectCreateDefaultPageObservables(log);
+        zip.apply(undefined, observables).subscribe(() => {
+            start.complete();
+        }, error => start.complete(error + ""));
+    }
+
+    private collectCreateDefaultPageObservables(log: Logger) {
+        const observables = [];
+        for (const pageName in defaultPages) {
+            if (defaultPages.hasOwnProperty) {
+                observables.push(this.createDefaultPage(pageName, defaultPages[pageName], log));
+            }
+        }
+        return observables;
+    }
+
+    private createDefaultPage(pageName: string, text: string, log: Logger) {
+        const start = log.start(LOG_NAME, "createDefaultPage " + pageName, {page: pageName});
+        return this.pageService.getPage(pageName, log).pipe(
+            catchError(() => {
+                const page = new PouchWikiPage(pageName);
+                page.setText(text);
+                return this.pageService.getDB().saveDocument(page, log);
+            }),
+            tap(() => {
+                start.complete();
+            })
+        );
     }
 }
