@@ -4,7 +4,7 @@
 </div>
 
 <div *ngIf="isAndroidOriOS()" class="editor">
-    <textarea id="textareaEditor" #textareaEditor></textarea>
+    <textarea id="textareaEditor" (keypress)="androidAppleChange()" #textareaEditor></textarea>
 </div>
 
 <div class="code-editor" #codeEditor></div>
