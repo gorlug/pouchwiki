@@ -1,31 +1,29 @@
-<div [ngClass]="{'dark-theme': isDarkTheme | async}">
-    <div class="mat-app-background">
-        <div *ngIf="(loginService.showLogin$ | async).value else loggedIn">
-            <h1><img class="logo" src="assets/icons/icon-72x72.png">PouchWiki</h1>
-            <app-login></app-login>
-        </div>
-        <ng-template #loggedIn>
-            <mat-toolbar color="primary">
-                <mat-menu #appMenu="matMenu">
-                    <button mat-menu-item routerLink="/page/Home">Home</button>
-                    <button mat-menu-item routerLink="/index">Index</button>
-                    <button mat-menu-item routerLink="/search">Search</button>
-                    <button mat-menu-item routerLink="/settings">Settings</button>
-                    <button mat-menu-item routerLink="/about">About</button>
-                </mat-menu>
-                <button mat-raised-button [matMenuTriggerFor]="appMenu" id="actions">
-                    Menu
-                </button>
-                <a routerLink="/page/Home"><img class="logo" src="assets/logo.png" alt="Go to Home"></a>
-                <span class="title">{{ this.pageService.pageTitle$ | async }}</span>
-
-                <span class="fill-space"></span>
-                <span class="status">
-            <span class="dot {{(loginService.status$ | async).color}}"></span>
-                    {{(loginService.status$ | async).name}}
-        </span>
-            </mat-toolbar>
-            <router-outlet></router-outlet>
-        </ng-template>
+<div [ngClass]="{'dark-theme': isDarkTheme | async}" class="pouchwiki mat-app-background">
+    <div *ngIf="(loginService.showLogin$ | async).value else loggedIn">
+        <h1><img class="logo" src="assets/icons/icon-72x72.png">PouchWiki</h1>
+        <app-login></app-login>
     </div>
+    <ng-template #loggedIn>
+        <mat-toolbar color="primary">
+            <mat-menu #appMenu="matMenu">
+                <button mat-menu-item routerLink="/page/Home">Home</button>
+                <button mat-menu-item routerLink="/index">Index</button>
+                <button mat-menu-item routerLink="/search">Search</button>
+                <button mat-menu-item routerLink="/settings">Settings</button>
+                <button mat-menu-item routerLink="/about">About</button>
+            </mat-menu>
+            <button mat-raised-button [matMenuTriggerFor]="appMenu" id="actions">
+                Menu
+            </button>
+            <a routerLink="/page/Home"><img class="logo" src="assets/logo.png" alt="Go to Home"></a>
+            <span class="title">{{ this.pageService.pageTitle$ | async }}</span>
+
+            <span class="fill-space"></span>
+            <span class="status">
+            <span class="dot {{(loginService.status$ | async).color}}"></span>
+                {{(loginService.status$ | async).name}}
+        </span>
+        </mat-toolbar>
+        <router-outlet></router-outlet>
+    </ng-template>
 </div>
