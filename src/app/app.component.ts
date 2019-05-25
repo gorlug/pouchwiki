@@ -4,6 +4,7 @@ import {LoggingService} from "./logging.service";
 import {PageService} from "./page.service";
 import {ActivatedRoute} from "@angular/router";
 import {BehaviorSubject} from "rxjs";
+import {OverlayContainer} from "@angular/cdk/overlay";
 
 const LOG_NAME = "AppComponent";
 
@@ -20,7 +21,9 @@ export class AppComponent implements OnInit {
     constructor(public loginService: LoginService,
                 private loggingService: LoggingService,
                 private pageService: PageService,
-                private route: ActivatedRoute) {
+                private route: ActivatedRoute,
+                private overlayContainer: OverlayContainer) {
+        overlayContainer.getContainerElement().classList.add("dark-theme");
     }
 
     ngOnInit(): void {
