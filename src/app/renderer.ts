@@ -33,6 +33,25 @@ export class PouchWikiPageToHtmlRenderer {
         this.renderer = new marked.Renderer();
         this.overwriteRendererImage();
         this.overwriteRendererLink();
+        this.overwriteRendererCode();
+    }
+
+    private overwriteRendererCode() {
+        const originalCode = this.renderer.code;
+        this.renderer.code = (text: string, infostring: string, escaped: boolean) => {
+            text = this.cleanupCodePageLinks(text);
+            return originalCode.call(this.renderer, text, infostring, escaped);
+        };
+
+        const originalCodespan = this.renderer.codespan;
+        this.renderer.codespan = (code: string) => {
+            code = this.cleanupCodePageLinks(code);
+            return originalCodespan.call(this.renderer, code);
+        };
+    }
+
+    cleanupCodePageLinks(text: string): string {
+        return text.replace(/(\[[^\]]+\])\(\/#\/page\/[^)]+\)/g, "$1");
     }
 
     private overwriteRendererImage() {

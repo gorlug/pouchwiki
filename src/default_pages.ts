@@ -6,11 +6,44 @@ This Wiki runs and saves the pages directly in your browser. To get started go t
 `,
     Help:
 `
-# Editing a page
 
-You can edit any page by clicking the \`Edit\` button above this text.
+# Page action buttons
+
+These can be found directly over the content of the page.
+
+## Edit
+
+You can edit any page by clicking the \`Edit\` button. If a page does not exist yet, clicking Edit and saving the content will create that page.
+
+## Attachments
+
+Allows you to upload files. You can link to these files from the page like this:
+
+\`[attachment.txt]\`
+
+## Delete
+
+Delete the current page.
+
+## Rename
+
+Change the name of the current page.
+
+# Linking to pages
+
+You can link to another page like this:
+
+\`[Home]\`
+
+[Home]
+
+# Breadcrumbs
+
+This box lists you the pages you have already visited.
 
 # Markdown
+
+The syntax used to write your wiki text.
 
 <a name="headers"/>
 
@@ -161,27 +194,22 @@ Some text to show that the reference links can follow later.
 
 ## Images
 
+If you want to use attachment images, simply put in the attachment name as the URL:
+
+\`![some image](some_image.png)\`
+
 \`\`\`no-highlight
 Here's our logo (hover to see the title text):
 
 Inline-style: 
-![alt text](https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png "Logo Title Text 1")
-
-Reference-style: 
-![alt text][logo]
-
-[logo]: https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png "Logo Title Text 2"
+![alt text](https://s3.eu-central-1.amazonaws.com/app.pouch.wiki/assets/icons/icon-128x128.png "Logo Title Text 1")
 \`\`\`
 
 Here's our logo (hover to see the title text):
 
 Inline-style: 
-![alt text](https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png "Logo Title Text 1")
+![alt text](https://s3.eu-central-1.amazonaws.com/app.pouch.wiki/assets/icons/icon-128x128.png "Logo Title Text 1")
 
-Reference-style: 
-![alt text][logo]
-
-[logo]: https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png "Logo Title Text 2"
 
 <a name="code"/>
 

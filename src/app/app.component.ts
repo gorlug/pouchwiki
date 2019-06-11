@@ -16,7 +16,7 @@ const LOG_NAME = "AppComponent";
 export class AppComponent implements OnInit {
     title = "pouchwiki";
 
-    isDarkTheme = new BehaviorSubject(true);
+    isDarkTheme = new BehaviorSubject(false);
 
     constructor(public loginService: LoginService,
                 private loggingService: LoggingService,

@@ -27,4 +27,16 @@ describe("renderer", () => {
         const text = renderer.convertPageLinks("some text [link with spaces] some more text");
         expect(text).toBe("some text [link with spaces](/#/page/LinkWithSpaces) some more text");
     });
+
+    it("should remove page link href info in code blocks", () => {
+        const input = `something [Help](/#/page/Help) some more
+
+something else [attachment.txt](/#/page/AttachmentTxt)`;
+        const renderer = createRenderer();
+        const output = renderer.cleanupCodePageLinks(input);
+        const expected = `something [Help] some more
+
+something else [attachment.txt]`;
+        expect(output).toBe(expected);
+    });
 });
