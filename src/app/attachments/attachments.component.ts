@@ -20,7 +20,7 @@ export class AttachmentsComponent implements OnInit {
     page: PouchWikiPage;
     attachments$: BehaviorSubject<string[]> = new BehaviorSubject([]);
 
-    @ViewChild("file") fileInput: ElementRef;
+    @ViewChild("file", { static: true }) fileInput: ElementRef;
 
     constructor(private loggingService: LoggingService,
                 private pageService: PageService,

@@ -26,8 +26,8 @@ export class EditorComponent implements OnInit {
 
     protected readonly onChangeDebounceTime = 500;
 
-    @ViewChild("codeEditor") codeEditorElmRef: ElementRef;
-    @ViewChild("textareaEditor") textareEditorRef: ElementRef;
+    @ViewChild("codeEditor", { static: true }) codeEditorElmRef: ElementRef;
+    @ViewChild("textareaEditor", { static: false }) textareEditorRef: ElementRef;
     private codeEditor: ace.Ace.Editor;
     private buffer: PouchDBWrapper;
 
