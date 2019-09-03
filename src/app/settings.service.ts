@@ -76,6 +76,7 @@ export class Settings extends PouchDBDocument<SettingsDocument> {
 
     constructor() {
         super();
+        this._id = Settings.DOC_ID;
         this.docVersion = AppVersion.VERSION;
     }
 
