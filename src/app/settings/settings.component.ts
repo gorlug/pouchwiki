@@ -5,6 +5,7 @@ import {BehaviorSubject} from "rxjs";
 import {ValueWithLogger} from "@gorlug/pouchdb-rxjs";
 import {concatMap} from "rxjs/operators";
 import {Router} from "@angular/router";
+import {SettingsService} from "../settings.service";
 
 const LOG_NAME = "SettingsComponent";
 
@@ -16,10 +17,13 @@ const LOG_NAME = "SettingsComponent";
 export class SettingsComponent implements OnInit {
 
     credentials$: BehaviorSubject<LoginCredentials>;
+    darkThemeToggled$ = new BehaviorSubject(false);
 
     constructor(private loggingService: LoggingService,
                 public loginService: LoginService,
-                private router: Router) {
+                private router: Router,
+                private settingsService: SettingsService) {
+        this.subscribeToSettings();
     }
 
     ngOnInit() {
@@ -49,6 +53,21 @@ export class SettingsComponent implements OnInit {
         this.loginService.logout(log).subscribe(() => {
             this.router.navigateByUrl("/page/Home");
             startLog.complete();
+        });
+    }
+
+    toggleDarkTheme() {
+        const log = this.loggingService.getLogger();
+        const settings = this.settingsService.settings$.getValue();
+        const startLog = log.start(LOG_NAME, "toggleDarkTheme darkTheme is: " + settings.darkTheme,
+            {darkTheme: settings.darkTheme});
+        settings.darkTheme = !settings.darkTheme;
+        this.settingsService.saveSettings(settings, log).subscribe(() => startLog.complete());
+    }
+
+    private subscribeToSettings() {
+        this.settingsService.settings$.subscribe(settings => {
+            this.darkThemeToggled$.next(settings.darkTheme);
         });
     }
 }

@@ -1,4 +1,4 @@
-<div [ngClass]="{'dark-theme': isDarkTheme | async}" class="pouchwiki mat-app-background">
+<div [ngClass]="{'dark-theme': isDarkTheme$ | async}" class="pouchwiki mat-app-background">
     <div *ngIf="(loginService.showLogin$ | async).value else loggedIn">
         <h1><img class="logo" src="assets/icons/icon-72x72.png">PouchWiki</h1>
         <app-login></app-login>

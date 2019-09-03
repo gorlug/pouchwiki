@@ -21,6 +21,7 @@ import {AttachmentsComponent} from "./attachments/attachments.component";
 import {SearchComponent} from "./search/search.component";
 import {SettingsComponent} from "./settings/settings.component";
 import {AboutComponent} from "./about/about.component";
+import {MatCheckboxModule} from "@angular/material/checkbox";
 
 const appRoutes: Routes = [
     {path: "page/:id", component: ContentComponent},
@@ -50,7 +51,7 @@ const appRoutes: Routes = [
         RouterModule.forRoot(appRoutes, {useHash: true}),
         BrowserModule,
         MatFormFieldModule, MatInputModule, BrowserAnimationsModule, MatToolbarModule, MatMenuModule,
-        ServiceWorkerModule.register("ngsw-worker.js", {enabled: environment.production}), MatButtonModule, MatExpansionModule
+        ServiceWorkerModule.register("ngsw-worker.js", {enabled: environment.production}), MatButtonModule, MatExpansionModule, MatCheckboxModule
     ],
     providers: [],
     bootstrap: [AppComponent]

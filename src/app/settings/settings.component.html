@@ -20,3 +20,7 @@
         </dl>
     </ng-container>
 </ng-template>
+<div>
+    <h2>Theme</h2>
+    <mat-checkbox (click)="toggleDarkTheme()" [checked]="darkThemeToggled$ | async">Dark</mat-checkbox>
+</div>
