@@ -15,7 +15,7 @@ import {
     RxjsUtil,
     ValueWithLogger
 } from "@gorlug/pouchdb-rxjs";
-import {catchError, concatMap} from "rxjs/operators";
+import {catchError, concatMap, tap} from "rxjs/operators";
 import {ajax, AjaxRequest} from "rxjs/ajax";
 import {AppVersion} from "./app.version";
 
@@ -353,9 +353,11 @@ export class LoginService {
     private triggerSuccessfulLogin(loginCredentials: LoginCredentials, log: Logger) {
         return RxjsUtil.operatorsToObservable([
             concatMap((result: ValueWithLogger) => {
+                return this.saveCredentials(loginCredentials, result.log);
+            }),
+            tap((result: ValueWithLogger) => {
                 this.showLogin$.next({value: false, log: result.log});
                 this.doExternalAuthentication$.next({value: true, log: result.log});
-                return this.saveCredentials(loginCredentials, result.log);
             })
         ], log);
     }
