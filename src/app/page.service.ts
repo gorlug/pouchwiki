@@ -127,8 +127,15 @@ export class PageService extends AbstractPouchDBService {
             page.getId(), attachment.name, page.getRev(), attachment.data, attachment.content_type
         )).pipe(
             concatMap(() => {
-                startLog.complete();
                 return this.getPage(page.getName(), log);
+            }),
+            concatMap((result: ValueWithLogger) => {
+                page = result.value;
+                page.attachmentInfo[attachment.name] = {
+                    uploadDate: moment()
+                };
+                startLog.complete();
+                return this.db.saveDocument(page, log);
             })
         );
     }

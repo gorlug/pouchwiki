@@ -8,7 +8,7 @@
             {{attachment}}
             <button mat-raised-button (click)="download(attachment)">
             Download</button> <button mat-raised-button
-                (click)="delete(attachment)">Delete</button>
+                (click)="delete(attachment)">Delete</button> {{getUploadDate(attachment)}}
         </li>
     </ul>
 </ng-container>

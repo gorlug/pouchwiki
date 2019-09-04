@@ -66,7 +66,6 @@ export class AttachmentsComponent implements OnInit {
 
     private loadAttachments() {
         const attachments = this.page.getAttachmentNames();
-        console.log("load attachments", attachments);
         this.attachments$.next(attachments);
     }
 
@@ -91,5 +90,10 @@ export class AttachmentsComponent implements OnInit {
                     startLog.complete();
             });
         }
+    }
+
+    getUploadDate(attachment: string): string {
+        const attachmentInfo = this.page.getAttachmentInfo(attachment);
+        return attachmentInfo.uploadDate.toLocaleString();
     }
 }

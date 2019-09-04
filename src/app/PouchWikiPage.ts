@@ -12,11 +12,20 @@ export interface PouchDBAttachment {
     stub: boolean;
 }
 
+export interface PouchWikiAttachmentInfo {
+    uploadDate: Moment;
+}
+
 export interface PouchWikiDocument extends PouchDBDocumentJSON {
     text: string;
-    lastModified: string,
+    lastModified: string;
     _attachments: {
         [filename: string]: PouchDBAttachment;
+    };
+    attachmentInfo: {
+        [filename: string]: {
+            uploadDate: string;
+        };
     };
 }
 
@@ -31,6 +40,9 @@ export class PouchWikiPage extends PouchDBDocument<PouchWikiDocument> {
     text: string;
     lastModified: Moment;
     attachments = {};
+    attachmentInfo: {
+        [filename: string]: PouchWikiAttachmentInfo;
+    } = {};
 
     constructor(name: string) {
         super();
@@ -67,6 +79,13 @@ export class PouchWikiPage extends PouchDBDocument<PouchWikiDocument> {
         json.text = this.text;
         json._attachments = this.attachments;
         json.lastModified = this.lastModified.toISOString(true);
+
+        json.attachmentInfo = {};
+        Object.keys(this.attachmentInfo).forEach(fileName => {
+            json.attachmentInfo[fileName] = {
+                uploadDate: this.attachmentInfo[fileName].uploadDate.toISOString(true)
+            };
+        });
     }
 
     protected getNameOfDoc(): string {
@@ -84,6 +103,9 @@ export class PouchWikiPage extends PouchDBDocument<PouchWikiDocument> {
         return this.lastModified.toLocaleString();
     }
 
+    getAttachmentInfo(fileName: string): PouchWikiAttachmentInfo {
+        return this.attachmentInfo[fileName];
+    }
 }
 
 export class PouchWikiPageGenerator extends PouchDBDocumentGenerator<PouchWikiPage> {
@@ -93,13 +115,46 @@ export class PouchWikiPageGenerator extends PouchDBDocumentGenerator<PouchWikiPa
         const page = new PouchWikiPage(json._id);
         page.text = json.text;
         page.attachments = json._attachments;
+        this.setLastModified(json, page);
+        this.setAttachmentInfo(json, page);
+
+        return page;
+    }
+
+    private setLastModified(json: PouchWikiDocument, page) {
         if (json.lastModified === undefined) {
             page.lastModified = moment();
         } else {
             page.lastModified = moment(json.lastModified);
         }
+    }
 
-        return page;
+    private setAttachmentInfo(json: PouchWikiDocument, page: PouchWikiPage) {
+        if (json.attachmentInfo === undefined) {
+            return this.createInitialAttachmentInfo(json, page);
+        }
+        // tslint:disable-next-line:forin
+        for (const fileName in json.attachmentInfo) {
+            page.attachmentInfo[fileName] = {
+                uploadDate: moment(json.attachmentInfo[fileName].uploadDate)
+            };
+        }
+    }
+
+    private createInitialAttachmentInfo(json: PouchWikiDocument, page: PouchWikiPage) {
+        const attachmentInfo: {
+            [filename: string]: PouchWikiAttachmentInfo;
+        } = {};
+        page.attachmentInfo = attachmentInfo;
+        if (json._attachments === undefined) {
+            return;
+        }
+        // tslint:disable-next-line:forin
+        for (const fileName in json._attachments) {
+            attachmentInfo[fileName] = {
+                uploadDate: moment()
+            };
+        }
     }
 }
 
