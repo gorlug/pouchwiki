@@ -1,19 +1,33 @@
 import {CouchDBConf, DBValueWithLog, Logger, PouchDBDocumentGenerator, PouchDBWrapper} from "@gorlug/pouchdb-rxjs";
 import {LoginCredentials, LoginCredentialsWithLogger, LoginResultWithLogger, LoginService} from "./login.service";
 import {LoggingService} from "./logging.service";
-import {concatMap} from "rxjs/operators";
+import {concatMap, skipWhile} from "rxjs/operators";
+import {environment} from "../environments/environment";
+import {BehaviorSubject, of} from "rxjs";
 
 const LOG_NAME = "AbstractPouchDBService";
 
 export abstract class AbstractPouchDBService {
 
     protected db: PouchDBWrapper;
+    dbLoaded$ = new BehaviorSubject(false);
 
     constructor(protected loggingService: LoggingService, protected loginService: LoginService) {
         const log = loggingService.getLogger();
         log.logMessage(LOG_NAME, "constructor");
         this.loadLocalDB(log);
         this.subscribeToDoExternalAuthentication(loginService, log);
+    }
+
+    waitForDBLoaded() {
+        return this.dbLoaded$.pipe(
+            concatMap(loaded => {
+                return of(loaded);
+            }),
+            skipWhile(loaded => {
+                return !loaded;
+            })
+        );
     }
 
     public abstract getDBName(): string;
@@ -45,16 +59,25 @@ export abstract class AbstractPouchDBService {
                 return PouchDBWrapper.loadExternalDB(conf, log);
             })
         ).subscribe((result: DBValueWithLog) => {
-            PouchDBWrapper.syncDBs(this.db, result.value, result.log);
+            if (environment.externalDBOnly) {
+                this.db = result.value;
+                this.dbLoaded$.next(true);
+            } else {
+                PouchDBWrapper.syncDBs(this.db, result.value, result.log);
+            }
             start.complete();
         });
     }
 
     private loadLocalDB(log: Logger) {
+        if (environment.externalDBOnly) {
+            return;
+        }
         log.logMessage(LOG_NAME, "loadLocalDB");
         PouchDBWrapper.loadLocalDB(this.getDBName(),
             this.getGenerator(), log).subscribe((result: DBValueWithLog) => {
                 this.db = result.value;
+                this.dbLoaded$.next(true);
         });
     }
 

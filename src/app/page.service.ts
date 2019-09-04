@@ -2,11 +2,10 @@ import {Injectable} from "@angular/core";
 import {Logger, PouchDBDocumentGenerator, ValueWithLogger} from "@gorlug/pouchdb-rxjs";
 import {PouchWikiAttachment, PouchWikiPage, PouchWikiPageGenerator} from "./PouchWikiPage";
 import {ActivatedRoute, ParamMap} from "@angular/router";
-import {switchMap} from "rxjs/internal/operators/switchMap";
 import {of} from "rxjs/internal/observable/of";
 import {concatMap} from "rxjs/internal/operators/concatMap";
 import {BehaviorSubject, Observable, throwError, zip} from "rxjs";
-import {catchError, tap} from "rxjs/operators";
+import {catchError, mergeMap, tap} from "rxjs/operators";
 import {PouchWikiPageToHtmlRenderer} from "./renderer";
 import {AbstractPouchDBService} from "./AbstractPouchDBService";
 import {LoggingService} from "./logging.service";
@@ -40,27 +39,34 @@ export class PageService extends AbstractPouchDBService {
     }
 
     getPage(name: string, log: Logger) {
-        log.logMessage(LOG_NAME, "getPage " + name, {name});
-        return this.db.getDocument(name, log);
+        const dbLoaded = this.dbLoaded$.getValue();
+        log.logMessage(LOG_NAME, "getPage " + name + ", dbLoaded: " + dbLoaded, {name, dbLoaded});
+        return this.waitForDBLoaded().pipe(
+            concatMap(() => {
+                return this.db.getDocument(name, log);
+            })
+        );
     }
 
     getPageFromRoute(route: ActivatedRoute, log: Logger): Observable<ValueWithLogger> {
         log.logMessage(LOG_NAME, "getPageTextFromRoute");
         let currentPage;
         return route.paramMap.pipe(
-            switchMap((params: ParamMap) => {
-                currentPage = params.get("id");
-                currentPage = PouchWikiPageToHtmlRenderer.sanitizeName(currentPage);
-                return of(currentPage);
-            }),
-            concatMap((pageName: string) => {
-               this.pageTitle$.next(pageName);
-               return this.getPage(pageName, log);
+            mergeMap((params: ParamMap) => {
+                currentPage = this.determinePageFromRoute(params);
+                return this.getPage(currentPage, log);
             }),
             catchError(() => {
                 return throwError(currentPage);
             })
         );
+    }
+
+    private determinePageFromRoute(params: ParamMap) {
+        let currentPage = params.get("id");
+        currentPage = PouchWikiPageToHtmlRenderer.sanitizeName(currentPage);
+        this.pageTitle$.next(currentPage);
+        return currentPage;
     }
 
     getDBName(): string {
@@ -117,14 +123,14 @@ export class PageService extends AbstractPouchDBService {
     }
 
     deleteAttachment(page: PouchWikiPage, name: string, log: Logger):
-            Observable<ValueWithLogger> {
+        Observable<ValueWithLogger> {
         const startLog = this.logStart(log, page, name, "deleteAttachment");
         return fromPromise(this.getDB().getPouchDB().removeAttachment(page.getId(), name,
             page.getRev())).pipe(
-                concatMap(() => {
-                    startLog.complete();
-                    return this.getDB().getDocument(page.getId(), log);
-                }),
+            concatMap(() => {
+                startLog.complete();
+                return this.getDB().getDocument(page.getId(), log);
+            }),
         );
     }
 

@@ -4,7 +4,7 @@
 
 export const environment = {
     production: false,
-    externalDBOnly: false
+    externalDBOnly: true
 };
 
 /*

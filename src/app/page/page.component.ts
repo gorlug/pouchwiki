@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, OnInit} from "@angular/core";
+import {AfterContentChecked, AfterViewInit, Component, OnInit} from "@angular/core";
 import {BehaviorSubject, zip} from "rxjs";
 import {PageService} from "../page.service";
 import {Logger, ValueWithLogger} from "@gorlug/pouchdb-rxjs";
@@ -20,7 +20,7 @@ const LOG_NAME = "PageComponent";
     templateUrl: "./page.component.html",
     styleUrls: ["./page.component.sass"]
 })
-export class PageComponent implements OnInit, AfterViewInit {
+export class PageComponent implements OnInit, AfterViewInit, AfterContentChecked {
 
     readonly startPageName = "Home";
 
@@ -41,6 +41,10 @@ export class PageComponent implements OnInit, AfterViewInit {
 
     private getLogger() {
         return this.loggingService.getLogger();
+    }
+
+    ngAfterContentChecked(): void {
+        this.getLogger().logMessage(LOG_NAME, "ngAfterContentChecked");
     }
 
     ngOnInit() {
@@ -87,6 +91,7 @@ export class PageComponent implements OnInit, AfterViewInit {
     }
 
     private loadPageFromRoute(log) {
+        log.logMessage(LOG_NAME, "loadPageFromRoute");
         const observable = this.pageService.getPageFromRoute(this.route, log);
         this.loadPageFromObservable(observable, log);
     }
