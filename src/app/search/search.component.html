@@ -1,16 +1,19 @@
-<mat-form-field>
-    <input matInput type="text" placeholder="query"
-           (keyup.enter)="search(query.value)"
-           id="query" #query>
-</mat-form-field>
+<div id="queryControl">
+    <mat-form-field>
+        <input matInput type="text" placeholder="query"
+               (keyup.enter)="search(query.value)"
+               id="query" #query>
+    </mat-form-field>
 
-<button mat-raised-button (click)="search(query.value)"
-        id="search">Search</button>
+    <button mat-raised-button (click)="search(query.value)"
+            id="search">Search
+    </button>
+</div>
 
 <ng-container *ngIf="searchResults$ | async as results">
-   <ul>
-       <li *ngFor="let pageName of results">
+    <ul>
+        <li *ngFor="let pageName of results">
             <a routerLink="/page/{{pageName}}">{{pageName}}</a>
-       </li>
-   </ul>
+        </li>
+    </ul>
 </ng-container>

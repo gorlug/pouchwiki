@@ -1,24 +1,26 @@
 <h2>Login</h2>
-<mat-form-field>
-    <input matInput placeholder="Username" id="username" #username/>
-</mat-form-field>
-<br>
-<mat-form-field>
-    <input matInput type="password" placeholder="Password" id="password" #password/>
-</mat-form-field>
-<br>
-<mat-form-field>
-    <input matInput type="url" placeholder="Url" id="url" #url/>
-</mat-form-field>
-<br>
-<mat-form-field>
-    <input matInput type="text" placeholder="DB" id="db" #db/>
-</mat-form-field>
-<br>
-<button mat-raised-button (click)="login(username.value, password.value, url.value, db.value);
+<div id="loginForm">
+    <mat-form-field>
+        <input matInput placeholder="Username" id="username" #username/>
+    </mat-form-field>
+    <br>
+    <mat-form-field>
+        <input matInput type="password" placeholder="Password" id="password" #password/>
+    </mat-form-field>
+    <br>
+    <mat-form-field>
+        <input matInput type="url" placeholder="Url" id="url" #url/>
+    </mat-form-field>
+    <br>
+    <mat-form-field>
+        <input matInput type="text" placeholder="DB" id="db" #db/>
+    </mat-form-field>
+    <br>
+    <button mat-raised-button (click)="login(username.value, password.value, url.value, db.value);
     username.value=''; password.value=''; url.value=''" id="login">
-    Login
-</button>
+        Login
+    </button>
+</div>
 <p>
     <button mat-raised-button (click)="offline()">Use locally</button>
     <span class="warning">
