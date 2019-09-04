@@ -26,6 +26,7 @@ export class PageComponent implements OnInit, AfterViewInit {
 
     html$: BehaviorSubject<string> = new BehaviorSubject("Loading...");
     pageName$: BehaviorSubject<string> = new BehaviorSubject("");
+    lastModified$ = new BehaviorSubject("");
     pageExists = false;
     currentPage: PouchWikiPage;
     doesNotExist$ = new BehaviorSubject(false);
@@ -98,6 +99,7 @@ export class PageComponent implements OnInit, AfterViewInit {
             this.currentPage = page;
             this.breadcrumbsService.addPage(page, log);
             this.pageName$.next(page.getName());
+            this.lastModified$.next(page.getLastModifiedString());
             this.renderPage(page, log);
             this.pageExists = true;
             this.doesNotExist$.next(false);
@@ -186,7 +188,7 @@ export class PageComponent implements OnInit, AfterViewInit {
             catchError(() => {
                 const page = new PouchWikiPage(pageName);
                 page.setText(text);
-                return this.pageService.getDB().saveDocument(page, log);
+                return this.pageService.savePage(page, log);
             }),
             tap(() => {
                 start.complete();

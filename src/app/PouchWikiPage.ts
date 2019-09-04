@@ -1,6 +1,8 @@
 import {PouchDBDocument, PouchDBDocumentGenerator, PouchDBDocumentJSON, PouchDBDocumentList} from "@gorlug/pouchdb-rxjs";
 import {PouchWikiPageToHtmlRenderer} from "./renderer";
 import {AppVersion} from "./app.version";
+import * as moment from "moment";
+import {Moment} from "moment";
 
 export interface PouchDBAttachment {
     content_type: string;
@@ -12,6 +14,7 @@ export interface PouchDBAttachment {
 
 export interface PouchWikiDocument extends PouchDBDocumentJSON {
     text: string;
+    lastModified: string,
     _attachments: {
         [filename: string]: PouchDBAttachment;
     };
@@ -26,6 +29,7 @@ export interface PouchWikiAttachment {
 export class PouchWikiPage extends PouchDBDocument<PouchWikiDocument> {
 
     text: string;
+    lastModified: Moment;
     attachments = {};
 
     constructor(name: string) {
@@ -62,6 +66,7 @@ export class PouchWikiPage extends PouchDBDocument<PouchWikiDocument> {
     protected addValuesToJSONDocument(json: PouchWikiDocument): any {
         json.text = this.text;
         json._attachments = this.attachments;
+        json.lastModified = this.lastModified.toISOString(true);
     }
 
     protected getNameOfDoc(): string {
@@ -75,6 +80,10 @@ export class PouchWikiPage extends PouchDBDocument<PouchWikiDocument> {
         return newPage;
     }
 
+    getLastModifiedString() {
+        return this.lastModified.toLocaleString();
+    }
+
 }
 
 export class PouchWikiPageGenerator extends PouchDBDocumentGenerator<PouchWikiPage> {
@@ -84,6 +93,12 @@ export class PouchWikiPageGenerator extends PouchDBDocumentGenerator<PouchWikiPa
         const page = new PouchWikiPage(json._id);
         page.text = json.text;
         page.attachments = json._attachments;
+        if (json.lastModified === undefined) {
+            page.lastModified = moment();
+        } else {
+            page.lastModified = moment(json.lastModified);
+        }
+
         return page;
     }
 }

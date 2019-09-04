@@ -32,4 +32,6 @@
     </p>
 
     <div [innerHTML]="html$ | async" class="content"></div>
+    <hr>
+    Last modified: <span>{{lastModified$ | async}}</span>
 </div>

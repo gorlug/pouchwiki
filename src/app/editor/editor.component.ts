@@ -96,7 +96,7 @@ export class EditorComponent implements OnInit {
         const startLog = log.start(LOG_NAME, "save");
         const text = this.getEditorText();
         this.page.setText(text);
-        this.pageService.getDB().saveDocument(this.page, log).subscribe(() => {
+        this.pageService.savePage(this.page, log).subscribe(() => {
             this.navigateToCurrentPage(startLog);
         });
         this.clearBuffer(log);

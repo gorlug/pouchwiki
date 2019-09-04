@@ -16,6 +16,7 @@ import PouchDB from "pouchdb-core";
 // @ts-ignore
 import pouchdb_find from "pouchdb-find";
 import {Content} from "@angular/compiler/src/render3/r3_ast";
+import * as moment from "moment";
 import FindRequest = PouchDB.Find.FindRequest;
 
 PouchDB.plugin(pouchdb_find);
@@ -44,6 +45,16 @@ export class PageService extends AbstractPouchDBService {
         return this.waitForDBLoaded().pipe(
             concatMap(() => {
                 return this.db.getDocument(name, log);
+            })
+        );
+    }
+
+    savePage(page: PouchWikiPage, log: Logger) {
+        log.logMessage(LOG_NAME, "savePage");
+        page.lastModified = moment();
+        return this.waitForDBLoaded().pipe(
+            concatMap(() => {
+                return this.db.saveDocument(page, log);
             })
         );
     }
@@ -217,7 +228,7 @@ export class PageService extends AbstractPouchDBService {
         const startLog = log.start(LOG_NAME, `copy ${page.getName()} to ${newName}`,
             {page: page.getName(), newName});
         const newPage = page.copyToNewPage(newName);
-        return this.getDB().saveDocument(newPage, log).pipe(
+        return this.savePage(newPage, log).pipe(
             tap(() => startLog.complete())
         );
     }
