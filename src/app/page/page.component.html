@@ -23,7 +23,8 @@
     </span>
 
         <ng-template #doesExist>
-            <button mat-raised-button routerLink="/attachments/{{pageName$ | async}}">Attachments</button>
+            <button mat-raised-button routerLink="/attachments/{{pageName$ | async}}">Attachments ({{numberOfAttachments$ | async}})
+            </button>
 
             <button mat-raised-button (click)="delete()">Delete</button>
 

@@ -27,6 +27,7 @@ export class PageComponent implements OnInit, AfterViewInit {
     html$: BehaviorSubject<string> = new BehaviorSubject("Loading...");
     pageName$: BehaviorSubject<string> = new BehaviorSubject("");
     lastModified$ = new BehaviorSubject("");
+    numberOfAttachments$ = new BehaviorSubject(0);
     pageExists = false;
     currentPage: PouchWikiPage;
     doesNotExist$ = new BehaviorSubject(false);
@@ -100,6 +101,7 @@ export class PageComponent implements OnInit, AfterViewInit {
             this.breadcrumbsService.addPage(page, log);
             this.pageName$.next(page.getName());
             this.lastModified$.next(page.getLastModifiedString());
+            this.numberOfAttachments$.next(page.getAttachmentNames().length);
             this.renderPage(page, log);
             this.pageExists = true;
             this.doesNotExist$.next(false);
