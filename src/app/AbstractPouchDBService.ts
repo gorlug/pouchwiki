@@ -84,5 +84,4 @@ export abstract class AbstractPouchDBService {
     getDB(): PouchDBWrapper {
         return this.db;
     }
-
 }
