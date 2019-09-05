@@ -99,6 +99,9 @@
                     "configurations": {
                         "production": {
                             "browserTarget": "pouchwiki:build:production"
+                        },
+                        "external": {
+                            "browserTarget": "pouchwiki:build:external"
                         }
                     }
                 },

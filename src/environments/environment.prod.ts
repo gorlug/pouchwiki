@@ -1,4 +1,5 @@
 export const environment = {
     production: true,
-    externalDBOnly: false
+    externalDBOnly: false,
+    buildName: ""
 };

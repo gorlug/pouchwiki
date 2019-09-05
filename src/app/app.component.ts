@@ -4,6 +4,8 @@ import {LoggingService} from "./logging.service";
 import {PageService} from "./page.service";
 import {BehaviorSubject} from "rxjs";
 import {SettingsService} from "./settings.service";
+import {Title} from "@angular/platform-browser";
+import {environment} from "../environments/environment";
 
 const LOG_NAME = "AppComponent";
 
@@ -20,7 +22,9 @@ export class AppComponent implements OnInit {
     constructor(public loginService: LoginService,
                 private loggingService: LoggingService,
                 private pageService: PageService,
-                private settingsService: SettingsService) {
+                private settingsService: SettingsService,
+                private titleService: Title) {
+        this.setTitle(titleService);
         this.subscribeToSettings(settingsService);
     }
 
@@ -31,5 +35,9 @@ export class AppComponent implements OnInit {
         this.settingsService.settings$.subscribe(settings => {
             this.isDarkTheme$.next(settings.darkTheme);
         });
+    }
+
+    private setTitle(titleService: Title) {
+        titleService.setTitle("PouchWiki " + environment.buildName);
     }
 }
