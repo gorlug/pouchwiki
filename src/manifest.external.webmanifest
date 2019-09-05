@@ -1,6 +1,6 @@
 {
-  "name": "PouchWiki",
-  "short_name": "PouchWiki",
+  "name": "PouchWiki External",
+  "short_name": "PouchWiki Ext",
   "theme_color": "#1976d2",
   "background_color": "#fafafa",
   "display": "standalone",
